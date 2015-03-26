@@ -1,12 +1,11 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\NoseGun.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\HealthController.cs">
     <Files>
-      <File FileName="Assets\Movement.cs" Line="29" Column="19" />
-      <File FileName="Assets\Example Games\2D Scrolling Shooter\Scripts\Explosion.cs" Line="1" Column="1" />
-      <File FileName="Assets\Example Games\2D Scrolling Shooter\Scripts\Bullet.cs" Line="1" Column="1" />
-      <File FileName="Assets\Example Games\Flappy Bird Style\Scripts\GameControlScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\NoseGun.cs" Line="23" Column="77" />
+      <File FileName="Assets\Scripts\bullet.cs" Line="18" Column="21" />
+      <File FileName="Assets\Scripts\NoseGun.cs" Line="21" Column="54" />
+      <File FileName="Assets\Scripts\HealthController.cs" Line="18" Column="105" />
+      <File FileName="Assets\Scripts\WallHealthController.cs" Line="10" Column="27" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
