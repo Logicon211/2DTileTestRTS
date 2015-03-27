@@ -18,18 +18,19 @@ public class RealMan : MonoBehaviour {
 	void FixedUpdate () {
 
 		anim = GetComponent<Animator>();
+		float move = Input.GetAxis("Horizontal");
 
-		if(Input.GetKey(KeyCode.RightArrow)) {
-			if(!facingRight) {
-				Flip();
+		if(move != 0/*Input.GetKey(KeyCode.RightArrow*/) {
+			if(move > 0) {
+				if(!facingRight) {
+					Flip();
+				}
+			} else {
+				if(facingRight) {
+					Flip();
+				}
 			}
-			RB.velocity = new Vector2(speed, RB.velocity.y);
-			anim.SetBool("Moving", true);
-		} else if(Input.GetKey(KeyCode.LeftArrow)) {
-			if(facingRight) {
-				Flip();
-			}
-			RB.velocity = new Vector2(-speed, RB.velocity.y);
+			RB.velocity = new Vector2(speed * move, RB.velocity.y);
 			anim.SetBool("Moving", true);
 		} else {
 			anim.SetBool("Moving", false);
