@@ -79,6 +79,7 @@
      <Compile Include="Assets\Scripts\HealthController.cs" />
      <Compile Include="Assets\Scripts\Movement.cs" />
      <Compile Include="Assets\Scripts\NoseGun.cs" />
+     <Compile Include="Assets\Scripts\RealMan.cs" />
      <Compile Include="Assets\Scripts\WallHealthController.cs" />
      <Compile Include="Assets\Scripts\bullet.cs" />
      <None Include="Assets\Example Games\Flappy Bird Style\_ReadMe.txt" />
