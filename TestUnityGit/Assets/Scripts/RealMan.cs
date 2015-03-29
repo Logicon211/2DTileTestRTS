@@ -5,13 +5,16 @@ public class RealMan : MonoBehaviour {
 
 	bool facingRight = true;
 	public float speed = 10f;
+	public float jumpForce;
 
 	private Rigidbody2D RB;
 	private Animator anim;
+	private Transform groundCheck;
 
 	// Use this for initialization
 	void Start () {
 		RB = GetComponent<Rigidbody2D>();
+		groundCheck = transform.FindChild ("groundCheck");
 	}
 	
 	// Update is called once per frame
@@ -19,6 +22,7 @@ public class RealMan : MonoBehaviour {
 
 		anim = GetComponent<Animator>();
 		float move = Input.GetAxis("Horizontal");
+		float jump = Input.GetAxis ("Vertical");
 
 		if(move != 0/*Input.GetKey(KeyCode.RightArrow*/) {
 			if(move > 0) {
@@ -34,6 +38,11 @@ public class RealMan : MonoBehaviour {
 			anim.SetBool("Moving", true);
 		} else {
 			anim.SetBool("Moving", false);
+		}
+
+		if (jump > 0 /* and grounnd check */) {
+			Debug.Log("Jump");
+			RB.AddForce(new Vector2(0, jumpForce));
 		}
 	}
 
