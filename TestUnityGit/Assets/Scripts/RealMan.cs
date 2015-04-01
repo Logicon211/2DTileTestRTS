@@ -59,7 +59,15 @@ public class RealMan : MonoBehaviour {
 		if (jump) {
 			//RB.AddForce(new Vector2(0f, jumpForce));
 			RB.velocity = new Vector2(RB.velocity.x, jumpSpeed);
+			anim.SetBool("Jumping", true);
 			jump = false; //reset the jump flag so it doesn't happen again immediately
+		}
+	}
+
+	void OnCollisionEnter2D (Collision2D col) 
+	{
+		if(col.gameObject.layer == LayerMask.NameToLayer("Ground")) {
+			anim.SetBool("Jumping", false);
 		}
 	}
 
