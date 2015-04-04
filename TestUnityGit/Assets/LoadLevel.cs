@@ -1,33 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
-using System.IO;
 
 public class LoadLevel : MonoBehaviour {
 
 	public TextAsset levelXml;
-	public GameObject[] tilePrefabs;
-
-	public int gridSize = 16;
-
-	Dictionary<string,string> obj;
 
 	// Use this for initialization
 	void Start () {
 		XmlDocument xmlDoc = new XmlDocument(); // xmlDoc is the new xml document.
 		xmlDoc.LoadXml(levelXml.text);
 		XmlNodeList levelsList = xmlDoc.GetElementsByTagName("level"); // array of the level nodes.
-		List<Vector2> tileList = new List<Vector2>();
 
 		foreach(XmlNode levelInfo in levelsList) {
 			XmlNodeList levelContent = levelInfo.ChildNodes;
-			obj = new Dictionary<string,string>(); // Create a object(Dictionary) to collect the both nodes inside the level node and then
 
 			foreach(XmlNode levelItems in levelContent) {
 				if(levelItems.Name == "Tiles") {
-
+					//get Attribuites for level
 					string tilesetName = levelItems.Attributes["tileset"].Value;
 
 					foreach (XmlNode levelTile in levelItems.ChildNodes) {
@@ -36,19 +26,20 @@ public class LoadLevel : MonoBehaviour {
 							//-y values because OGMO's axis starts in the upper left and not lower left.
 							int tileY = -int.Parse(levelTile.Attributes["y"].Value);
 							int id = int.Parse(levelTile.Attributes["id"].Value);
-							//Get individual child info?
 
 							//convert these to cases?
-							//This also doesn't seem to get pixel perfect position
+							//More possible tiles
+							//Note, in order to use Resources.load, the prefab needs to be in the Resources folder
 							if(id == 7) {
-								Instantiate(tilePrefabs[0], new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation);
+								GameObject tile = Instantiate(Resources.Load("BasicTile"), new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation) as GameObject;
+								tile.transform.parent = transform;
 							} else if(id == 20) {
-								Instantiate(tilePrefabs[1], new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation);
+								GameObject tile = Instantiate(Resources.Load("GrassTile"), new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation) as GameObject;
+								tile.transform.parent = transform;
 							} else if(id == 30) {
-								Instantiate(tilePrefabs[2], new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation);
+								GameObject tile = Instantiate(Resources.Load("RoundedTile"), new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation) as GameObject;
+								tile.transform.parent = transform;
 							}
-
-							tileList.Add(new Vector2(tileX, tileY));
                    		}
 					}
 				}
