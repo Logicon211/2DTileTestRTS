@@ -1,8 +1,13 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\LoadLevel.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\LoadLevelEditor.cs">
     <Files>
-      <File FileName="Assets\LoadLevel.cs" Line="7" Column="28" />
+      <File FileName="..\..\TestAutoTIle\AutoTileProject\Assets\AutoTileSet\Source\AutoTileSetManager.cs" Line="1" Column="1" />
+      <File FileName="..\..\TestAutoTIle\AutoTileProject\Assets\AutoTileSet\Source\AutoTileSetManagerEditor.cs" Line="1" Column="1" />
+      <File FileName="..\..\TestAutoTIle\AutoTileProject\Assets\AutoTileSet\Source\AutoTileSetQuad.cs" Line="1" Column="1" />
+      <File FileName="..\..\TestAutoTIle\AutoTileProject\Assets\AutoTileSet\Source\AutoTile.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\LoadLevel.cs" Line="34" Column="38" />
+      <File FileName="Assets\Scripts\LoadLevelEditor.cs" Line="14" Column="42" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
