@@ -84,6 +84,7 @@
      <Compile Include="Assets\Scripts\RealMan.cs" />
      <Compile Include="Assets\Scripts\WallHealthController.cs" />
      <Compile Include="Assets\Scripts\bullet.cs" />
+     <Compile Include="Assets\TrackMouse.cs" />
      <None Include="Assets\Example Games\Flappy Bird Style\_ReadMe.txt" />
      <None Include="Assets\TestLevel.xml" />
      <None Include="Assets\Fonts\LuckiestGuy\LICENSE.txt" />

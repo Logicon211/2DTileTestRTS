@@ -6,7 +6,7 @@ public class RealMan : MonoBehaviour {
 	[HideInInspector]
 	public bool jump = false;				// Condition for whether the player should jump.
 
-	bool facingRight = true;
+	public bool facingRight = true;
 	public float speed = 10f;
 	public float jumpSpeed = 20f;
 
@@ -76,5 +76,11 @@ public class RealMan : MonoBehaviour {
 		Vector3 theScale = transform.localScale;
 		theScale.x *= -1;
 		transform.localScale = theScale;
+
+		foreach (Transform child in transform){
+			Vector3 childScale = child.localScale;
+			childScale.x  *= -1;
+			child.localScale = childScale;
+		}
 	}
 }

@@ -1,13 +1,9 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\LoadLevelEditor.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\RealMan.cs">
     <Files>
-      <File FileName="..\..\TestAutoTIle\AutoTileProject\Assets\AutoTileSet\Source\AutoTileSetManager.cs" Line="1" Column="1" />
-      <File FileName="..\..\TestAutoTIle\AutoTileProject\Assets\AutoTileSet\Source\AutoTileSetManagerEditor.cs" Line="1" Column="1" />
-      <File FileName="..\..\TestAutoTIle\AutoTileProject\Assets\AutoTileSet\Source\AutoTileSetQuad.cs" Line="1" Column="1" />
-      <File FileName="..\..\TestAutoTIle\AutoTileProject\Assets\AutoTileSet\Source\AutoTile.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\LoadLevel.cs" Line="34" Column="38" />
-      <File FileName="Assets\Scripts\LoadLevelEditor.cs" Line="14" Column="42" />
+      <File FileName="Assets\TrackMouse.cs" Line="17" Column="54" />
+      <File FileName="Assets\Scripts\RealMan.cs" Line="77" Column="20" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
