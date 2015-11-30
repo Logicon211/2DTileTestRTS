@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+#if UNITY_EDITOR
 using UnityEditor;
 
 [CustomEditor(typeof(LoadLevel))]
@@ -31,3 +32,4 @@ public class LoadLevelEditor : Editor {
 	
 	//}
 }
+#endif

@@ -77,9 +77,9 @@ public class RealMan : MonoBehaviour {
 		theScale.x *= -1;
 		transform.localScale = theScale;
 
-		foreach (Transform child in transform){
+		foreach (Transform child in transform) {
 			Vector3 childScale = child.localScale;
-			childScale.x  *= -1;
+			childScale.x *= -1;
 			child.localScale = childScale;
 		}
 	}
