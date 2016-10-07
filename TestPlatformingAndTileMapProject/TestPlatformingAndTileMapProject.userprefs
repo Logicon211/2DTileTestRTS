@@ -1,0 +1,20 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\LoadLevel.cs">
+    <Files>
+      <File FileName="Assets\TrackMouse.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\LoadLevel.cs" Line="162" Column="101" />
+      <File FileName="Assets\TestLevel.xml" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\RealMan.cs" Line="1" Column="1" />
+      <File FileName="Assets\Example Games\Hat Trick - The Catch Game\Scripts\HT_Restart.cs" Line="1" Column="1" />
+      <File FileName="Assets\TestParticles.xml" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="D:\Unity Desktop Storage\GIT Projects\TestPlatformingAndTileMap\TestPlatformingAndTileMapProject\Assets\Scripts\LoadLevel.cs" line="123" column="1" />
+      <Breakpoint file="D:\Unity Desktop Storage\GIT Projects\TestPlatformingAndTileMap\TestPlatformingAndTileMapProject\Assets\Scripts\LoadLevel.cs" line="171" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

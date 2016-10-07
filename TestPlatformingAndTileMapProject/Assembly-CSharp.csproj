@@ -85,6 +85,7 @@
      <Compile Include="Assets\Scripts\bullet.cs" />
      <Compile Include="Assets\TrackMouse.cs" />
      <None Include="Assets\Example Games\Flappy Bird Style\_ReadMe.txt" />
+     <None Include="Assets\SmallLevel.xml" />
      <None Include="Assets\TestLevel.xml" />
      <None Include="Assets\Fonts\LuckiestGuy\LICENSE.txt" />
      <None Include="Assets\Example Games\Angry Birds Style\_ReadMe.txt" />
