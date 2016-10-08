@@ -3,13 +3,13 @@ using System.Collections;
 #if UNITY_EDITOR
 using UnityEditor;
 
-[CustomEditor(typeof(LoadLevel))]
+[CustomEditor(typeof(Level))]
 public class LoadLevelEditor : Editor {
 
 	public override void OnInspectorGUI() {
 		DrawDefaultInspector();
 
-		LoadLevel loadLevelScript = (LoadLevel)target;
+		Level loadLevelScript = (Level )target;
 	
 		if(GUILayout.Button ("Load Level")) {
 			loadLevelScript.loadAtStartUp = false;
