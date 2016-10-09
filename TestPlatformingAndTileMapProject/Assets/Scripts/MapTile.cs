@@ -7,6 +7,8 @@ public class MapTile : MonoBehaviour {
 	public int x;
 	public int y;
 
+	public Level level;
+
 	// Use this for initialization
 	void Start () {
 
@@ -21,10 +23,55 @@ public class MapTile : MonoBehaviour {
 		int i = 0;
 	}
 
-	public void Instantiate(int x, int y, Transform parent) {
+	public void Instantiate(int x, int y, Transform parent, Level level) {
 		this.x = x;
 		this.y = y;
 		this.transform.parent = parent;
+		this.level = level;
+	}
+		
+
+	void OnCollisionEnter2D(Collision2D col) {
+		//This isn't calling for some reason
+		//Test for projectile collision
+		IProjectile projectile = (IProjectile)col.gameObject.GetComponent (typeof(IProjectile));
+		if (projectile != null) {
+			projectile.OnMapTileHit(this);
+		}
+		//Check for player collision, blow him up and he loses or whatever
+//		if (col.gameObject.tag == "Player")
+//		{
+//			ship = col.gameObject.GetComponent<Ship>();
+//			ship.takeHit();
+//			kill();
+//
+//		}
+	}
+
+	public void DestroyTile() {
+		//remove itself from the maptile array
+		this.level.mapTiles [x, y] = null;
+		Destroy (this.gameObject);
+	}
+
+	public bool CheckTileUp() {
+		return y > 0 && level.mapTiles [x, y - 1] != null;
+	}
+
+	public bool CheckTileRight() {
+		return x < level.mapTiles.GetLength(0)-1 && level.mapTiles [x + 1, y] != null;
+	}
+
+	public bool CheckTileDown() {
+		return y < level.mapTiles.GetLength(1)-1 && level.mapTiles [x, y + 1] != null;
+	}
+
+	public bool CheckTileLeft() {
+		return x > 0 && level.mapTiles [x - 1, y] != null;
+	}
+
+	public bool IsOuterTile() {
+		return !CheckTileUp () || !CheckTileRight() || !CheckTileDown() || !CheckTileLeft();
 	}
 
 }

@@ -1,0 +1,6 @@
+- Make Dude a bit bigger maybe
+- Figure out why he randomly gets stuck when trying to move left or right. I think it has something to do with the how the colliders work, and the shape of his might be intersecting at the wrong points
+- If needed make the collider square again and figure out a manual way of traversing small inclines
+- Make the ground check 2 points on both sides of the sprite, and check for a group collision between the 3 points to determine if it can jump
+- Add an explosion sprite/animation
+- 

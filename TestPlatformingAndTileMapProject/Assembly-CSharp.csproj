@@ -77,12 +77,14 @@
      <Compile Include="Assets\Example Games\Hat Trick - The Catch Game\Scripts\HT_StartGame.cs" />
      <Compile Include="Assets\Scripts\GroundTile.cs" />
      <Compile Include="Assets\Scripts\HealthController.cs" />
+     <Compile Include="Assets\Scripts\IProjectile.cs" />
      <Compile Include="Assets\Scripts\Level.cs" />
      <Compile Include="Assets\Scripts\LoadLevelEditor.cs" />
      <Compile Include="Assets\Scripts\MapTile.cs" />
      <Compile Include="Assets\Scripts\Movement.cs" />
      <Compile Include="Assets\Scripts\NoseGun.cs" />
      <Compile Include="Assets\Scripts\RealMan.cs" />
+     <Compile Include="Assets\Scripts\Rocket.cs" />
      <Compile Include="Assets\Scripts\WallHealthController.cs" />
      <Compile Include="Assets\Scripts\bullet.cs" />
      <Compile Include="Assets\TrackMouse.cs" />

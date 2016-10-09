@@ -76,7 +76,7 @@ public class Level : MonoBehaviour {
 							//Ground Tile
 							if (id == 0) {
 								tile = (Instantiate(groundTilePrefab, new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation) as GameObject).GetComponent<MapTile> ();
-								tile.Instantiate (tileX, -tileY, transform);
+								tile.Instantiate (tileX, -tileY, transform, this);
 							} 
 							//More tiles to check for in here
 
@@ -133,7 +133,7 @@ public class Level : MonoBehaviour {
 	public void refreshCollidersOnOuterTiles() {
 		for (int x = 0; x < mapTiles.GetLength (0); x++) {
 			for (int y = 0; y < mapTiles.GetLength (1); y++) {
-				if(mapTiles[x,y] != null && IsOuterTile (x, y)) {
+				if(mapTiles[x,y] != null && mapTiles[x, y].IsOuterTile()) {
 					//Enable Collider
 					mapTiles [x, y].gameObject.GetComponent<BoxCollider2D> ().enabled = true;
 				}
@@ -150,10 +150,10 @@ public class Level : MonoBehaviour {
 		//Next will just try enabling collision boxes on just the edges
 		//Also need to be able to put edges around multiple blocks of tiles, and on the inner empty spaces
 
-		bool tileUp = CheckTileUp (x, y);
-		bool tileRight = CheckTileRight (x, y);
-		bool tileDown = CheckTileDown (x, y);
-		bool tileLeft = CheckTileLeft(x, y);
+		bool tileUp = mapTiles[x, y].CheckTileUp ();
+		bool tileRight = mapTiles[x, y].CheckTileRight ();
+		bool tileDown = mapTiles[x, y].CheckTileDown ();
+		bool tileLeft = mapTiles[x, y].CheckTileLeft();
 
 		if (startPoint.Equals (new Vector2 (x, -y)) && path.Count > 1) {
 			//We're back to the beginning, return the path
@@ -240,25 +240,5 @@ public class Level : MonoBehaviour {
 	private void AddNodeToPath(List<Vector2> path, int x, int y) {
 		Vector2 node = new Vector2 (x, y);
 		path.Add (node);
-	}
-
-	private bool CheckTileUp(int x, int y) {
-		return y > 0 && mapTiles [x, y - 1] != null;
-	}
-
-	private bool CheckTileRight(int x, int y) {
-		return x < mapTiles.GetLength(0)-1 && mapTiles [x + 1, y] != null;
-	}
-
-	private bool CheckTileDown(int x, int y) {
-		return y < mapTiles.GetLength(1)-1 && mapTiles [x, y + 1] != null;
-	}
-
-	private bool CheckTileLeft(int x, int y) {
-		return x > 0 && mapTiles [x - 1, y] != null;
-	}
-
-	private bool IsOuterTile(int x, int y) {
-		return !CheckTileUp (x, y) || !CheckTileRight(x, y) || !CheckTileDown(x, y) || !CheckTileLeft(x, y);
 	}
 }
