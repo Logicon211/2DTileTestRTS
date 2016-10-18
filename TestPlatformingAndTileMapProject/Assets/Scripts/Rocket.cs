@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Rocket : MonoBehaviour, IProjectile {
 
+	public GameObject explosionEffect;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -21,6 +23,7 @@ public class Rocket : MonoBehaviour, IProjectile {
 		//refresh colliders
 		level.refreshCollidersOnOuterTiles();
 
+		Instantiate (explosionEffect, mapTile.transform.position, Quaternion.identity);
 		//Destory the projectile
 		Destroy (this.gameObject);
 	}
