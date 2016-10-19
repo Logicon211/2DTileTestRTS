@@ -9,6 +9,8 @@ public class MapTile : MonoBehaviour {
 
 	public Level level;
 
+	public int HP = 10;
+
 	// Use this for initialization
 	void Start () {
 
@@ -52,6 +54,13 @@ public class MapTile : MonoBehaviour {
 		//remove itself from the maptile array
 		this.level.mapTiles [x, y] = null;
 		Destroy (this.gameObject);
+	}
+
+	public void TakeDamage(int damage) {
+		HP = HP - damage;
+		if (HP <= 0) {
+			DestroyTile ();
+		}
 	}
 
 	public bool CheckTileUp() {

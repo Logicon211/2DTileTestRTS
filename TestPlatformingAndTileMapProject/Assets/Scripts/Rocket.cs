@@ -5,6 +5,8 @@ public class Rocket : MonoBehaviour, IProjectile {
 
 	public GameObject explosionEffect;
 
+	public int damage = 20;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -135,7 +137,9 @@ public class Rocket : MonoBehaviour, IProjectile {
 			for (int x = -radius; x <= radius; x++) {
 				if ((x * x + y * y <= radius * radius) && centerX + x >= 0 && centerX + x < level.mapTiles.GetLength (0) - 1 && centerY + y >= 0 && centerY + y < level.mapTiles.GetLength (1) - 1) {
 					if (level.mapTiles[centerX + x,centerY + y] != null) {
-						level.mapTiles[centerX + x,centerY + y].DestroyTile ();
+						float dmgMod = 1 - ((float)(x * x + y * y) / (float)(radius*radius));
+						int damageToTile = Mathf.RoundToInt(damage * dmgMod);
+						level.mapTiles [centerX + x, centerY + y].TakeDamage (damageToTile);//DestroyTile ();
 					}
 				}
 			}
