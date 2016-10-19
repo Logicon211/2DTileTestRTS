@@ -5,6 +5,8 @@ public class TrackMouse : MonoBehaviour {
 
 	public GameObject rocket;
 
+	private bool upsideDown = false;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -12,7 +14,8 @@ public class TrackMouse : MonoBehaviour {
 
 	void Update() {
 
-		bool faceRight = transform.GetComponentInParent<RealMan>().facingRight;
+		bool faceRight = transform.GetComponentInParent<Unit>().facingRight;
+
 		Vector3 pos = Camera.main.WorldToScreenPoint(transform.position);
 		Vector3 dir = Input.mousePosition - pos;
 		float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
@@ -20,6 +23,16 @@ public class TrackMouse : MonoBehaviour {
 		//We need 2 rotations stored so that we can display them correctly when the model is flipped left, but also need the actual rotate for when we spawn new rockets down below
 		Quaternion actualRotate = Quaternion.AngleAxis(angle, Vector3.forward);
 		transform.rotation = actualRotate;
+
+		if (angle > 90f || angle < -90f) {
+			if (!upsideDown) {
+				YFlip ();
+			}
+		} else {
+			if (upsideDown) {
+				YFlip ();
+			}
+		}
 
 		if(Input.GetMouseButtonDown(0)) {
 			GameObject rocketLaunched = null;
@@ -36,16 +49,17 @@ public class TrackMouse : MonoBehaviour {
 
 	// Update is called once per frame
 	void FixedUpdate () {
-		//if(!(transform.parent.GetComponent<RealMan>()).facingRight) {
+		//if(!(transform.parent.GetComponent<Unit>()).facingRight) {
 		//	Flip();
 		//}
 	}
 
-	//void Flip() {
-	//	facingRight = !facingRight;
-//
-	//	Vector3 theScale = transform.localScale;
-	//	theScale.x *= -1;
-	//	transform.localScale = theScale;
-	//}
+	//Used for when the tracked object goes past 90 or -90 degrees so we flip it vertically so it's no longer upside down
+	void YFlip() {
+		upsideDown = !upsideDown;
+
+		Vector3 theScale = transform.localScale;
+		theScale.y *= -1;
+		transform.localScale = theScale;
+	}
 }

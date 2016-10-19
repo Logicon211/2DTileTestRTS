@@ -1,15 +1,15 @@
 fileFormatVersion: 2
-guid: 883b1c9363381b04c811c6fae18cc0dc
-timeCreated: 1427848745
+guid: 690b1b6b0da60ce4189e6fc1ebc235de
+timeCreated: 1476833612
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: JumpingMan_0
-    21300002: JumpingMan_1
-    21300004: JumpingMan_2
-    21300006: JumpingMan_3
-    21300008: JumpingMan_4
-    21300010: JumpingMan_5
+    21300000: RunningMan 1_0
+    21300002: RunningMan 1_1
+    21300004: RunningMan 1_2
+    21300006: RunningMan 1_3
+    21300008: RunningMan 1_4
+    21300010: RunningMan 1_5
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -23,13 +23,13 @@ TextureImporter:
   bumpmap:
     convertToNormalMap: 0
     externalNormalMap: 0
-    heightScale: .25
+    heightScale: 0.25
     normalMapFilter: 0
   isReadable: 0
   grayScaleToAlpha: 0
   generateCubemap: 0
   cubemapConvolution: 0
-  cubemapConvolutionSteps: 8
+  cubemapConvolutionSteps: 7
   cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
   textureFormat: -1
@@ -43,19 +43,23 @@ TextureImporter:
   lightmap: 0
   rGBM: 0
   compressionQuality: 50
+  allowsAlphaSplitting: 0
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
-  spritePivot: {x: .5, y: .5}
+  spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 100
   alphaIsTransparency: 1
+  spriteTessellationDetail: -1
   textureType: 8
   buildTargetSettings: []
   spriteSheet:
+    serializedVersion: 2
     sprites:
-    - name: JumpingMan_0
+    - serializedVersion: 2
+      name: RunningMan 1_0
       rect:
         serializedVersion: 2
         x: 0
@@ -65,7 +69,10 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: JumpingMan_1
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: RunningMan 1_1
       rect:
         serializedVersion: 2
         x: 250
@@ -75,7 +82,10 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: JumpingMan_2
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: RunningMan 1_2
       rect:
         serializedVersion: 2
         x: 500
@@ -85,7 +95,23 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: JumpingMan_3
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: RunningMan 1_3
+      rect:
+        serializedVersion: 2
+        x: 750
+        y: 250
+        width: 250
+        height: 250
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: RunningMan 1_4
       rect:
         serializedVersion: 2
         x: 0
@@ -95,7 +121,10 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: JumpingMan_4
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: RunningMan 1_5
       rect:
         serializedVersion: 2
         x: 250
@@ -105,16 +134,9 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: JumpingMan_5
-      rect:
-        serializedVersion: 2
-        x: 500
-        y: 0
-        width: 250
-        height: 250
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    outline: []
   spritePackingTag: 
   userData: 
   assetBundleName: 

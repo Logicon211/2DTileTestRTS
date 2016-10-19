@@ -53,12 +53,13 @@
      <Compile Include="Assets\Scripts\MapTile.cs" />
      <Compile Include="Assets\Scripts\Movement.cs" />
      <Compile Include="Assets\Scripts\NoseGun.cs" />
-     <Compile Include="Assets\Scripts\RealMan.cs" />
      <Compile Include="Assets\Scripts\Rocket.cs" />
      <Compile Include="Assets\Scripts\TrackMouse.cs" />
+     <Compile Include="Assets\Scripts\Unit.cs" />
      <Compile Include="Assets\Scripts\WallHealthController.cs" />
      <Compile Include="Assets\Scripts\bullet.cs" />
      <Compile Include="Assets\Scripts\explosion.cs" />
+     <None Include="Assets\Levels\TinyLevel.xml" />
      <None Include="Assets\Levels\SmallLevel.xml" />
      <None Include="Assets\Levels\TestLevel.xml" />
      <None Include="Assets\Fonts\LuckiestGuy\LICENSE.txt" />

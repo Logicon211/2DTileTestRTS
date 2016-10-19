@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class RealMan : MonoBehaviour {
+public class Unit : MonoBehaviour {
 
 	[HideInInspector]
 	public bool jump = false;				// Condition for whether the player should jump.
