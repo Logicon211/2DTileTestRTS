@@ -26,16 +26,7 @@ public class MapTile : MonoBehaviour {
 
 	// Update is called once per frame
 	public void Update () {
-		if (HP != maxHP) {
-			float healthPercentage = (((float)HP / (float)maxHP)) * 100;
-			if (healthPercentage > 66) {
-				renderer.sprite = undamagedSprite;
-			} else if (healthPercentage > 33) {
-				renderer.sprite = dingedSprite;
-			} else {
-				renderer.sprite = damagedSprite;
-			}
-		}
+
 	}
 
 	public virtual void TestInheritance() {
@@ -77,6 +68,15 @@ public class MapTile : MonoBehaviour {
 		HP = HP - damage;
 		if (HP <= 0) {
 			DestroyTile ();
+		} else {
+			float healthPercentage = ((float)HP / (float)maxHP) * 100;
+			if (healthPercentage > 66) {
+				renderer.sprite = undamagedSprite;
+			} else if (healthPercentage > 33) {
+				renderer.sprite = dingedSprite;
+			} else {
+				renderer.sprite = damagedSprite;
+			}
 		}
 	}
 
