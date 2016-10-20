@@ -4,13 +4,13 @@ using System.Collections;
 public class GroundTile : MapTile {
 
 	// Use this for initialization
-	void Start () {
-		
+	public void Start () {
+		base.Start();
 	}
 	
 	// Update is called once per frame
-	void Update () {
-	
+	public void Update () {
+		base.Update ();
 	}
 
 	public override void TestInheritance() {

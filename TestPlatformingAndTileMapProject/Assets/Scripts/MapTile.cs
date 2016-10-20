@@ -9,16 +9,33 @@ public class MapTile : MonoBehaviour {
 
 	public Level level;
 
+	public int maxHP = 10;
 	public int HP = 10;
 
-	// Use this for initialization
-	void Start () {
+	public Sprite undamagedSprite;
+	public Sprite dingedSprite;
+	public Sprite damagedSprite;
 
+	protected SpriteRenderer renderer;
+
+	// Use this for initialization
+	public void Start () {
+		renderer = this.GetComponent<SpriteRenderer> ();
+		renderer.sprite = undamagedSprite;
 	}
 
 	// Update is called once per frame
-	void Update () {
-
+	public void Update () {
+		if (HP != maxHP) {
+			float healthPercentage = (((float)HP / (float)maxHP)) * 100;
+			if (healthPercentage > 66) {
+				renderer.sprite = undamagedSprite;
+			} else if (healthPercentage > 33) {
+				renderer.sprite = dingedSprite;
+			} else {
+				renderer.sprite = damagedSprite;
+			}
+		}
 	}
 
 	public virtual void TestInheritance() {
