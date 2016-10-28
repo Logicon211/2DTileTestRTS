@@ -22,10 +22,27 @@ public class Level : MonoBehaviour {
 			InstantiateLevel();
 		}
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-	
+		//right mouse button click
+		if(Input.GetMouseButtonDown(1)) {
+
+			Vector3 mouseScreenPosition = Camera.main.ScreenToWorldPoint(new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 0));
+			Vector2 mousePosition = new Vector2(mouseScreenPosition.x, mouseScreenPosition.y);
+
+			RaycastHit2D hit = Physics2D.Raycast(mousePosition, new Vector2(0, -1));
+
+			//Draws a line for a frame
+			//Debug.DrawRay(mousePosition, new Vector2(0, -1), Color.green);
+
+			if (hit.collider != null) {
+				if (hit.collider.gameObject.GetComponent<MapTile> () != null) {
+					//Instead of making an explosion. We want to save this point as the waypoint for the unit to move. Will need to figure out how to do pathfinding this way
+					Instantiate(Resources.Load ("Explosion") as GameObject , new Vector3(hit.point.x, hit.point.y, 0), transform.rotation);
+				}
+			}
+		}
 	}
 
 	public void ClearLevel() {
