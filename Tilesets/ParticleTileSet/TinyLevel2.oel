@@ -1,4 +1,4 @@
-<level width="512" height="512">
+<level width="640" height="480">
   <Tiles tileset="BlackParticle" exportMode="XML">
     <tile x="20" y="51" id="0" />
     <tile x="20" y="52" id="0" />

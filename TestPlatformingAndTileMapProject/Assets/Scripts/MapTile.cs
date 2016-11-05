@@ -18,6 +18,8 @@ public class MapTile : MonoBehaviour {
 
 	protected SpriteRenderer renderer;
 
+	private TileType tileType = TileType.Block;
+
 	// Use this for initialization
 	public void Start () {
 		renderer = this.GetComponent<SpriteRenderer> ();
@@ -100,4 +102,7 @@ public class MapTile : MonoBehaviour {
 		return !CheckTileUp () || !CheckTileRight() || !CheckTileDown() || !CheckTileLeft();
 	}
 
+	public TileType getTileType() {
+		return tileType;
+	}
 }
