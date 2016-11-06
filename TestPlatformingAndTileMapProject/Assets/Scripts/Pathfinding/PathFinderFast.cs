@@ -296,7 +296,12 @@ namespace Algorithms
                         mNewLocationX = (ushort) (mLocationX + mDirection[i,0]);
                         mNewLocationY = (ushort) (mLocationY + mDirection[i,1]);
                         mNewLocation  = (mNewLocationY << mGridXLog2) + mNewLocationX;
-						
+
+						//Cut children loop early if child is out of bounds of maptile array
+						if (mNewLocationX < 0 || mNewLocationX >= mLevel.mWidth || mNewLocationY < 0 || mNewLocationY >= mLevel.mHeight) {
+							goto CHILDREN_LOOP_END;
+						}
+
 						var onGround = false;
 						var atCeiling = false;
 
@@ -353,6 +358,7 @@ namespace Algorithms
 
 
 						//The commented out part here would normally be "1" for empty space, but in this case it would be checking a null object so we'll go with this for now
+						//If Jumping is too prevalent (Or not enough) change the amount we divide the newJumpLength by here. 4 is the default from the algorithm but it sometimes makes the path pretty jumpy
                         mNewG = nodes[mLocation.xy][mLocation.z].G + /*mGrid[mNewLocationX, mNewLocationY]*/1 + newJumpLength / 4;
 
                         if (nodes[mNewLocation].Count > 0)

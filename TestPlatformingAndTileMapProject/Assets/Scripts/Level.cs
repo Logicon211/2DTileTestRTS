@@ -17,7 +17,7 @@ public enum TileType
 public class Level : MonoBehaviour {
 
 	public TextAsset levelXml;
-	public bool loadAtStartUp;
+	public bool loadAtStartUp = true;
 	public MapTile[,] mapTiles;
 
 	public GameObject groundTilePrefab;
@@ -48,6 +48,7 @@ public class Level : MonoBehaviour {
 	static public int cTileSize = 16;
 
 	private LineRenderer lineRenderer;
+	public LayerMask playerLayerMask;
 
 
 	// Use this for initialization
@@ -71,10 +72,11 @@ public class Level : MonoBehaviour {
 			Vector3 mouseScreenPosition = Camera.main.ScreenToWorldPoint(new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 0));
 			Vector2 mousePosition = new Vector2(mouseScreenPosition.x, mouseScreenPosition.y);
 
-			RaycastHit2D hit = Physics2D.Raycast(mousePosition, new Vector2(0, -1));
+			RaycastHit2D hit = Physics2D.Raycast(mousePosition, new Vector2(0, -1), Mathf.Infinity, playerLayerMask);
 
 			//Draws a line for a frame
 			//Debug.DrawRay(mousePosition, new Vector2(0, -1), Color.green);
+
 
 			Vector2 clickPosition = new Vector2();
 			Vector2 playerPosition = new Vector2();
@@ -83,25 +85,22 @@ public class Level : MonoBehaviour {
 
 
 			if (hit.collider != null) {
-				if (hit.collider.gameObject.GetComponent<MapTile> () != null) {
+				MapTile tile = hit.collider.gameObject.GetComponent<MapTile> ();
+				if (tile != null) {
 					//Instead of making an explosion. We want to save this point as the waypoint for the unit to move. Will need to figure out how to do pathfinding this way
 					//Instantiate(Resources.Load ("Explosion") as GameObject , new Vector3(hit.point.x, hit.point.y, 0), transform.rotation);
-					clickPosition = new Vector2(hit.point.x, hit.point.y);
+					clickPosition = new Vector2(tile.x , tile.y + 1);
 					foundClick = true;
 				}
 			}
 
-			//Player raycast down isn't hitting anything and debug draw ray doesn't do anything either.
-
 			Vector2 player2DPosition = new Vector2 (player.transform.position.x, player.transform.position.y);
-			hit = Physics2D.Raycast(player2DPosition, new Vector2(0, -1));
-			Debug.DrawRay(player.transform.position, new Vector3(0, -1, 0));
+			RaycastHit2D playerHit = Physics2D.Raycast(player2DPosition, new Vector2(0, -1), Mathf.Infinity, playerLayerMask);
 
-			if (hit.collider != null) {
-				if (hit.collider.gameObject.GetComponent<MapTile> () != null) {
-					//Instead of making an explosion. We want to save this point as the waypoint for the unit to move. Will need to figure out how to do pathfinding this way
-					//Instantiate(Resources.Load ("Explosion") as GameObject , new Vector3(hit.point.x, hit.point.y, 0), transform.rotation);
-					playerPosition = new Vector2(hit.point.x, hit.point.y);
+			if (playerHit.collider != null) {
+				MapTile tile = playerHit.collider.gameObject.GetComponent<MapTile> ();
+				if (tile != null) {
+					playerPosition = new Vector2(tile.x , tile.y + 1);
 					foundPlayer = true;
 				}
 			}
@@ -109,7 +108,8 @@ public class Level : MonoBehaviour {
 			if (foundClick && foundPlayer) {
 				Vector2i start = new Vector2i(Convert.ToInt32(playerPosition.x), Convert.ToInt32(playerPosition.y));
 				Vector2i end = new Vector2i(Convert.ToInt32(clickPosition.x), Convert.ToInt32(clickPosition.y));
-				DrawPathLines(mPathFinder.FindPath(start, end, 1, 1, 6));
+				List<Vector2i> path = mPathFinder.FindPath (start, end, 1, 1, 6);
+				DrawPathLines(path);
 			}
 		}
 	}
@@ -517,11 +517,12 @@ public class Level : MonoBehaviour {
 		if (path != null && path.Count > 0) {
 			lineRenderer.enabled = true;
 			lineRenderer.SetVertexCount (path.Count);
-			lineRenderer.SetWidth (4.0f, 4.0f);
+			lineRenderer.SetWidth (1.0f, 1.0f);
 
 			for (var i = 0; i < path.Count; ++i) {
 				lineRenderer.SetColors (Color.red, Color.red);
-				lineRenderer.SetPosition (i, transform.position + new Vector3 (path [i].x * cTileSize, path [i].y * cTileSize, -5.0f));
+				//Commenting out tile size because I've manually made the tiles big
+				lineRenderer.SetPosition (i, transform.position + new Vector3 (path [i].x/* * cTileSize*/, path [i].y/* * cTileSize*/, -5.0f));
 			}
 		} else {
 			lineRenderer.enabled = false;

@@ -65,11 +65,11 @@
      <Compile Include="Assets\Scripts\WallHealthController.cs" />
      <Compile Include="Assets\Scripts\bullet.cs" />
      <Compile Include="Assets\Scripts\explosion.cs" />
-     <None Include="Assets\Levels\SmallLevel.xml" />
      <None Include="Assets\Levels\TestLevel.xml" />
      <None Include="Assets\Fonts\LuckiestGuy\LICENSE.txt" />
      <None Include="Assets\Levels\TestParticles.xml" />
      <None Include="Assets\Levels\TinyLevel.xml" />
+     <None Include="Assets\Levels\SmallLevel.xml" />
      <None Include="Assets\Fonts\PressStart2P-Regular\OFL.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>D:/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
