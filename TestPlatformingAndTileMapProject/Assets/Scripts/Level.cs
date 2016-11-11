@@ -108,7 +108,7 @@ public class Level : MonoBehaviour {
 			if (foundClick && foundPlayer) {
 				Vector2i start = new Vector2i(Convert.ToInt32(playerPosition.x), Convert.ToInt32(playerPosition.y));
 				Vector2i end = new Vector2i(Convert.ToInt32(clickPosition.x), Convert.ToInt32(clickPosition.y));
-				List<Vector2i> path = mPathFinder.FindPath (start, end, 1, 1, 6);
+				List<Vector2i> path = mPathFinder.FindPath (start, end, player.GetComponent<Unit>().width, player.GetComponent<Unit>().height, 6);
 				DrawPathLines(path);
 			}
 		}

@@ -233,7 +233,41 @@ namespace Algorithms
                 while (touchedLocations.Count > 0)
                     nodes[touchedLocations.Pop()].Clear();
 				
-				if (mGrid[end.x, end.y] != null)
+				var inSolidTile = false;
+
+				for (var i = 0; i < characterWidth; ++i)
+				{
+					inSolidTile = false;
+					for (var w = 0; w < characterWidth; ++w)
+					{
+						if ((end.x + w < 0 || end.x + w >= mLevel.mWidth) || mGrid[end.x + w, end.y] != null
+							|| mGrid[end.x + w, end.y + characterHeight - 1] != null)
+						{
+							inSolidTile = true;
+							break;
+						}
+
+					}
+					if (inSolidTile == false)
+					{
+						for (var h = 1; h < characterHeight - 1; ++h)
+						{
+							if ((end.y + h < 0 || end.y + h >= mLevel.mHeight) || mGrid[end.x, end.y + h] != null
+								|| mGrid[end.x + characterWidth - 1, end.y + h] != null)
+							{
+								inSolidTile = true;
+								break;
+							}
+						}
+					}
+
+					if (inSolidTile)
+						end.x -= characterWidth - 1;
+					else
+						break;
+				}
+
+				if (inSolidTile == true)
 					return null;
 
                 mFound              = false;
@@ -255,8 +289,19 @@ namespace Algorithms
                 firstNode.PY = (ushort)start.y;
                 firstNode.PZ = 0;
                 firstNode.Status = mOpenNodeValue;
-				
-				if (mLevel.IsGround(start.x, start.y - 1))
+
+				bool startsOnGround = false;
+
+				for (int x = start.x; x < start.x + characterWidth; ++x)
+				{
+					if (mLevel.IsGround(x, start.y - 1))
+					{
+						startsOnGround = true;
+						break;
+					}
+				}
+
+				if (startsOnGround)
 					firstNode.JumpLength = 0;
 				else
 					firstNode.JumpLength = (short)(maxCharacterJumpHeight * 2);
@@ -305,14 +350,24 @@ namespace Algorithms
 						var onGround = false;
 						var atCeiling = false;
 
-                        if (mGrid[mNewLocationX, mNewLocationY] != null)
-                            goto CHILDREN_LOOP_END;
+						for (var w = 0; w < characterWidth; ++w)
+						{
+							if (mGrid[mNewLocationX + w, mNewLocationY] != null
+								|| mGrid[mNewLocationX + w, mNewLocationY + characterHeight - 1] != null)
+								goto CHILDREN_LOOP_END;
 
-                        if (mLevel.IsGround(mNewLocationX, mNewLocationY - 1))
-                            onGround = true;
-                        else if (mGrid[mNewLocationX, mNewLocationY + characterHeight] != null)
-                            atCeiling = true;	
-						
+							if (mLevel.IsGround(mNewLocationX + w, mNewLocationY - 1))
+								onGround = true;
+							else if (mGrid[mNewLocationX + w, mNewLocationY + characterHeight] != null)
+								atCeiling = true;
+						}
+						for (var h = 1; h < characterHeight - 1; ++h)
+						{
+							if (mGrid[mNewLocationX, mNewLocationY + h] != null
+								|| mGrid[mNewLocationX + characterWidth - 1, mNewLocationY + h] != null)
+								goto CHILDREN_LOOP_END;
+						}
+
 						//calculate a proper jumplength value for the successor
 
                         var jumpLength = nodes[mLocation.xy][mLocation.z].JumpLength;

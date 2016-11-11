@@ -10,9 +10,11 @@ public class Unit : MonoBehaviour {
 	public float speed = 10f;
 	public float jumpSpeed = 20f;
 
+	public int width = 4;
+	public int height = 6;
+
 	private Rigidbody2D RB;
 	private Animator anim;
-
 
 	private Transform groundCheck1;
 	private Transform groundCheck2;
