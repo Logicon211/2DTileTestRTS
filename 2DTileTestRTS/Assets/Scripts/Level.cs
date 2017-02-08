@@ -24,6 +24,9 @@ public class Level : MonoBehaviour {
 
 	public enum Direction {Up, Right, Down, Left};
 
+	//Static reference to itself (Singleton)
+	public static Level mainLevel;
+
 	//Temporary
 	public GameObject player;
 
@@ -60,6 +63,7 @@ public class Level : MonoBehaviour {
 			InstantiateLevel();
 		}
 
+		mainLevel = this;
 		//PATHFINDER STUFF
 		InitPathFinder();
 	}
@@ -108,7 +112,7 @@ public class Level : MonoBehaviour {
 			if (foundClick && foundPlayer) {
 				Vector2i start = new Vector2i(Convert.ToInt32(playerPosition.x), Convert.ToInt32(playerPosition.y));
 				Vector2i end = new Vector2i(Convert.ToInt32(clickPosition.x), Convert.ToInt32(clickPosition.y));
-				List<Vector2i> path = mPathFinder.FindPath (start, end, player.GetComponent<Unit>().width, player.GetComponent<Unit>().height, 6);
+				List<Vector2i> path = mPathFinder.FindPath (start, end, player.GetComponent<Unit>().width, player.GetComponent<Unit>().height, player.GetComponent<Unit>().maxJumpHeight);
 				DrawPathLines(path);
 			}
 		}
@@ -117,6 +121,14 @@ public class Level : MonoBehaviour {
 	void FixedUpdate() {
 		//PATHFINDER STUFF
 		//player.BotUpdate();
+	}
+
+	//Singleton implementation, Should probably check if this is how you do it in Unity
+	public static Level getLevel() {
+		if (mainLevel == null) {
+			mainLevel = new Level ();
+		}
+		return mainLevel;
 	}
 
 	public void ClearLevel() {
