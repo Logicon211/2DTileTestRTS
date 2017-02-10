@@ -14,7 +14,7 @@ public class Unit : MonoBehaviour {
 	public int maxJumpHeight = 6;
 
 
-	public int width = 4;
+	public int width = 3;
 	public int height = 6;
 
 	private Rigidbody2D RB;
@@ -33,6 +33,7 @@ public class Unit : MonoBehaviour {
 
 	private BotState mCurrentBotState;
 	private bool[] mInputs;
+	private bool[] mPrevInputs;
 	private int mCurrentNodeId;
 
 	public enum KeyInput
@@ -45,12 +46,18 @@ public class Unit : MonoBehaviour {
 	}
 
 	private Level mLevel;
-	private Bounds mAABB;
+	public Bounds mAABB;
 	private List<Vector2i> mPath;
 	private int mFramesOfJumping;
+	private Vector2 mOldPosition;
+	private int mStuckFrames;
+	public const int cMaxStuckFrames = 20;
+	private LineRenderer lineRenderer;
 
 	// Use this for initialization
 	void Start () {
+		lineRenderer = GetComponent<LineRenderer> ();
+
 		mLevel = Level.getLevel ();
 		RB = GetComponent<Rigidbody2D>();
 		mAABB = GetComponent<SpriteRenderer> ().bounds;
@@ -58,6 +65,11 @@ public class Unit : MonoBehaviour {
 		groundCheck2 = transform.FindChild ("groundCheck2");
 		mCurrentBotState = BotState.None;
 		mFramesOfJumping = 0;
+		mStuckFrames = 0;
+		mOldPosition = new Vector2 (transform.position.x, transform.position.y);
+		mInputs = new bool[(int)KeyInput.Count];
+		mPrevInputs = new bool[(int)KeyInput.Count];
+		mPath = new List<Vector2i> ();
 	}
 
 	void Update() {
@@ -68,72 +80,62 @@ public class Unit : MonoBehaviour {
 		bool grounded3 = Physics2D.Linecast(groundCheck1.position, groundCheck2.position, 1 << LayerMask.NameToLayer("Ground"));
 		grounded = grounded1 || grounded2 || grounded3;
 		
-		// If the jump button is pressed and the player is grounded then the player should jump.
-		if(Input.GetAxis("Vertical") > 0 && grounded) {
-			jump = true;
-		}
-
-		//Bot movement code
-		Vector2 prevDest, currentDest, nextDest;
-		bool destOnGround, reachedY, reachedX;
-		GetContext(out prevDest, out currentDest, out nextDest, out destOnGround, out reachedX, out reachedY);
-
-		Vector2 pathPosition = mAABB.center - (mAABB.size / 2) + Vector2.one * mLevel.cTileSize * 0.5f;
-
-		mInputs[(int)KeyInput.GoRight] = false;
-		mInputs[(int)KeyInput.GoLeft] = false;
-		mInputs[(int)KeyInput.Jump] = false;
-		mInputs[(int)KeyInput.GoDown] = false;
-
-		if (pathPosition.y - currentDest.y > Constants.cBotMaxPositionError/* && mOnOneWayPlatform TODO: Handle one way platforms*/)
-			mInputs[(int)KeyInput.GoDown] = true;
-
-		if (mFramesOfJumping > 0 &&	(!grounded || (reachedX && !destOnGround) || (grounded && destOnGround)))
-		{
-			mInputs[(int)KeyInput.Jump] = true;
-			if (!grounded)
-				--mFramesOfJumping;
-		}
-
-		if (reachedX && reachedY) {
-			mCurrentNodeId++;
-			if (mCurrentNodeId >= mPath.Count)
-			{
-				mCurrentNodeId = -1;
-				ChangeState(BotState.None);
-				break;
-			}
-		}
+		mAABB = GetComponent<SpriteRenderer> ().bounds;
 	}
 	
 	// Update is called once per frame
 	void FixedUpdate () {
+		BotUpdate ();
 
-		anim = GetComponent<Animator>();
-		float move = Input.GetAxis("Horizontal");
+		anim = GetComponent<Animator> ();
+		float move = Input.GetAxis ("Horizontal");
 
-		if(move != 0/*Input.GetKey(KeyCode.RightArrow*/) {
-			if(move > 0) {
-				if(!facingRight) {
-					Flip();
+		// If the jump button is pressed and the player is grounded then the player should jump.
+		if (Input.GetAxis ("Vertical") > 0 && grounded) {
+			jump = true;
+		}
+
+		//Bot control reading
+		if (mInputs [(int)KeyInput.GoRight]) {
+			move = 1;
+		}
+
+		if (mInputs [(int)KeyInput.GoLeft]) {
+			move = -1;
+		}
+		
+		if (mInputs [(int)KeyInput.Jump]) {
+			jump = true;
+		}
+
+		if (move != 0/*Input.GetKey(KeyCode.RightArrow*/) {
+			if (move > 0) {
+				if (!facingRight) {
+					Flip ();
 				}
 			} else {
-				if(facingRight) {
-					Flip();
+				if (facingRight) {
+					Flip ();
 				}
 			}
-			RB.velocity = new Vector2(speed * move, RB.velocity.y);
-			anim.SetBool("Moving", true);
+			RB.velocity = new Vector2 (speed * move, RB.velocity.y);
+			anim.SetBool ("Moving", true);
 		} else {
-			anim.SetBool("Moving", false);
+			anim.SetBool ("Moving", false);
 		}
 
 		if (jump) {
 			//RB.AddForce(new Vector2(0f, jumpForce));
-			RB.velocity = new Vector2(RB.velocity.x, jumpSpeed);
-			anim.SetBool("Jumping", true);
+			RB.velocity = new Vector2 (RB.velocity.x, jumpSpeed);
+			anim.SetBool ("Jumping", true);
 			jump = false; //reset the jump flag so it doesn't happen again immediately
 		}
+
+		//Need to update old position after update
+		mOldPosition = new Vector2 (transform.position.x, transform.position.y);
+		UpdatePrevInputs ();
+
+			
 	}
 
 	void OnCollisionEnter2D (Collision2D col) 
@@ -159,18 +161,133 @@ public class Unit : MonoBehaviour {
 	//******Bot Functions below******
 	void BotUpdate()
 	{
+		//get the position of the bottom of the bot's aabb, this will be much more useful than the center of the sprite (mPosition)
+		int tileX, tileY;
+		var position = mAABB.center;
+		position.y -= (mAABB.size.y/2);
+
+		mLevel.GetMapTileAtPoint(position, out tileX, out tileY);
+
+		int characterHeight = height;//Mathf.CeilToInt(mAABB.size.y*2.0f/Level.cTileSize);
+
+		int dir;
+
 		switch (mCurrentBotState)
 		{
 		case BotState.None:
-			/* no need to do anything */
+			TestJumpValues();
+
+			if (mFramesOfJumping > 0)
+			{
+				mFramesOfJumping -= 1;
+				mInputs[(int)KeyInput.Jump] = true;
+			}
+
 			break;
 
 		case BotState.MoveTo:
-			/* bot movement update logic */
+			Vector2 prevDest, currentDest, nextDest;
+			bool destOnGround, reachedY, reachedX;
+			GetContext (out prevDest, out currentDest, out nextDest, out destOnGround, out reachedX, out reachedY);
+
+			//TODO: Turn this into just a Vector2 Method (Currently its grabbing the bottom center point of the unit, dunno if that's good)
+			Vector2 pathPosition = new Vector2(transform.position.x,transform.position.y - (height/2));//mAABB.center - (mAABB.size / 2) + Vector3.one * Level.cTileSize * 0.5f;
+
+			mInputs [(int)KeyInput.GoRight] = false;
+			mInputs [(int)KeyInput.GoLeft] = false;
+			mInputs [(int)KeyInput.Jump] = false;
+			mInputs [(int)KeyInput.GoDown] = false;
+
+			if (pathPosition.y - currentDest.y > Constants.cBotMaxPositionError/* && mOnOneWayPlatform TODO: Handle one way platforms*/)
+				mInputs [(int)KeyInput.GoDown] = true;
+
+			if (reachedX && reachedY) {
+				int prevNodeId = mCurrentNodeId;
+				mCurrentNodeId++;
+
+				if (mCurrentNodeId >= mPath.Count) {
+					mCurrentNodeId = -1;
+					ChangeAction (BotState.None);
+					break;
+				}
+
+				if (grounded)
+					mFramesOfJumping = GetJumpFramesForNode (prevNodeId);
+
+				goto case BotState.MoveTo;
+			} else if (!reachedX) {
+				if (currentDest.x - pathPosition.x > Constants.cBotMaxPositionError)
+					mInputs [(int)KeyInput.GoRight] = true;
+				else if (pathPosition.x - currentDest.x > Constants.cBotMaxPositionError)
+					mInputs [(int)KeyInput.GoLeft] = true;
+			} else if (!reachedY && mPath.Count > mCurrentNodeId + 1 && !destOnGround) {
+				int checkedX = 0;
+
+				if (mPath [mCurrentNodeId + 1].x != mPath [mCurrentNodeId].x) {
+					mLevel.GetMapTileAtPoint (pathPosition, out tileX, out tileY);
+
+					if (mPath [mCurrentNodeId + 1].x > mPath [mCurrentNodeId].x)
+						checkedX = tileX + width;
+					else
+						checkedX = tileX - 1;
+				}
+
+				if (checkedX != 0 && !mLevel.AnySolidBlockInStripe (checkedX, tileY, mPath [mCurrentNodeId + 1].y)) {
+					if (nextDest.x - pathPosition.x > Constants.cBotMaxPositionError)
+						mInputs [(int)KeyInput.GoRight] = true;
+					else if (pathPosition.x - nextDest.x > Constants.cBotMaxPositionError)
+						mInputs [(int)KeyInput.GoLeft] = true;
+
+					if (ReachedNodeOnXAxis (pathPosition, currentDest, nextDest) && ReachedNodeOnYAxis (pathPosition, currentDest, nextDest)) {
+						mCurrentNodeId += 1;
+						goto case BotState.MoveTo;
+					}
+				}
+			}
+
+			if (mFramesOfJumping > 0 &&
+			    (!grounded || (reachedX && !destOnGround) || (grounded && destOnGround))) {
+				Debug.Log (mFramesOfJumping + " : " + jumpSpeed);
+				mInputs [(int)KeyInput.Jump] = true;
+				if (!grounded)
+					--mFramesOfJumping;
+			}
+
+			Vector2 mPosition = new Vector2 (transform.position.x, transform.position.y);
+			if (mPosition == mOldPosition)
+			{
+				++mStuckFrames;
+				if (mStuckFrames > cMaxStuckFrames) {
+					MoveTo (mPath [mPath.Count - 1]);
+					mStuckFrames = 0;
+				}
+			}
+			else
+				mStuckFrames = 0;
+
 			break;
 		}
 
-		CharacterUpdate();
+//		if (gameObject.activeInHierarchy)
+//			CharacterUpdate();
+//		}
+	}
+
+	//I'm assuming this is a debug function to test how long certain number of button frames affect jumping
+	public void TestJumpValues()
+	{
+		if (Input.GetKeyDown(KeyCode.Alpha1))
+			mFramesOfJumping = GetJumpFrameCount(1);
+		else if (Input.GetKeyDown(KeyCode.Alpha2))
+			mFramesOfJumping = GetJumpFrameCount(2);
+		else if (Input.GetKeyDown(KeyCode.Alpha3))
+			mFramesOfJumping = GetJumpFrameCount(3);
+		else if (Input.GetKeyDown(KeyCode.Alpha4))
+			mFramesOfJumping = GetJumpFrameCount(4);
+		else if (Input.GetKeyDown(KeyCode.Alpha5))
+			mFramesOfJumping = GetJumpFrameCount(5);
+		else if (Input.GetKeyDown(KeyCode.Alpha6))
+			mFramesOfJumping = GetJumpFrameCount(6);
 	}
 
 	public void ChangeState(BotState newState)
@@ -204,18 +321,31 @@ public class Unit : MonoBehaviour {
 		}
 	}
 
-	//Probably don't need this as I've already figured this one out sort of
-	public void TappedOnTile(Vector2i mapPos)
+	//Returns the tile coordinate of the empty space above a ground tile found below the tile coordinate passed in
+	public Vector2i getTopOfGroundTileBelowTile(Vector2i mapPos)
 	{
+		//TODO: Need to check if there is NO ground tile below passed in point
+
 		while (!(mLevel.IsGround(mapPos.x, mapPos.y)))
 			--mapPos.y;
 
-		MoveTo(new Vector2i(mapPos.x, mapPos.y + 1));
+		return new Vector2i(mapPos.x, mapPos.y + 1);
 	}
 
 	public void MoveTo(Vector2i destination)
 	{
-		Vector2i startTile = mLevel.GetMapTileAtPoint(mAABB.center - mAABB.size/2 + Vector2.one * mLevel.cTileSize * 0.5f);
+		//clear old path;
+		mPath.Clear();
+
+		//TODO: Try to use an actual AABB object eventually (Bounding Box)
+		//Vector2 mAABBCenter = new Vector2(transform.position.x, transform.position.y);
+		//Vector2 mAABBHalfSize = new Vector2(width/2, height/2);
+
+		Vector2i centerUnitTile = mLevel.GetMapTileAtPoint (new Vector2 (transform.position.x, transform.position.y));
+		Vector2i startTile = getTopOfGroundTileBelowTile(centerUnitTile);
+		//Vector2i startTile = mLevel.GetMapTileAtPoint(mAABBCenter - mAABBHalfSize/* + Vector2.one * Level.cTileSize * 0.5f*/);
+
+		Debug.DrawLine (new Vector3 (startTile.x, startTile.y, 1), new Vector3 (startTile.x, startTile.y + 1, 1), Color.blue, 1000.0f, false);
 
 		if (grounded && !IsOnGroundAndFitsPos(startTile))
 		{
@@ -229,14 +359,11 @@ public class Unit : MonoBehaviour {
 		var path =  mLevel.mPathFinder.FindPath(
 			startTile, 
 			destination,
-			Mathf.CeilToInt((mAABB.size.x/2)/ 8.0f), 
-			Mathf.CeilToInt((mAABB.size.y/2) / 8.0f), 
+			width,
+			height,
+			//Mathf.CeilToInt((mAABB.size.x/2)/ 8.0f), 
+			//Mathf.CeilToInt((mAABB.size.y/2) / 8.0f), 
 			(short)maxJumpHeight);
-
-		if (path != null && path.Count > 1) {
-			for (var i = path.Count - 1; i >= 0; --i)
-				mPath.Add(path[i]);
-		}
 
 		if (path != null && path.Count > 1)
 		{
@@ -244,8 +371,13 @@ public class Unit : MonoBehaviour {
 				mPath.Add(path[i]);
 
 			mCurrentNodeId = 1;
+
 			ChangeState(BotState.MoveTo);
+
+			mFramesOfJumping = GetJumpFramesForNode(0);
 		}
+		//Debug path
+		DrawPathLines(mPath);
 	}
 
 	bool IsOnGroundAndFitsPos(Vector2i pos)
@@ -268,25 +400,31 @@ public class Unit : MonoBehaviour {
 		return false;
 	}
 
+	public void ChangeAction(BotState newAction)
+	{
+		mCurrentBotState = newAction;
+	}
+
 	public void GetContext(out Vector2 prevDest, out Vector2 currentDest, out Vector2 nextDest, out bool destOnGround, out bool reachedX, out bool reachedY)
 	{
 		//Translate from map coordinates to world coordinates
-		prevDest = new Vector2(mPath[mCurrentNodeId - 1].x * mLevel.cTileSize + mLevel.transform.position.x,
-			mPath[mCurrentNodeId - 1].y * mLevel.cTileSize + mLevel.transform.position.y);
+		prevDest = new Vector2(mPath[mCurrentNodeId - 1].x * Level.cTileSize + mLevel.transform.position.x,
+			mPath[mCurrentNodeId - 1].y * Level.cTileSize + mLevel.transform.position.y);
 
-		currentDest = new Vector2(mPath[mCurrentNodeId].x * mLevel.cTileSize + mLevel.transform.position.x,
-			mPath[mCurrentNodeId].y * mLevel.cTileSize + mLevel.transform.position.y);
+		currentDest = new Vector2(mPath[mCurrentNodeId].x * Level.cTileSize + mLevel.transform.position.x,
+			mPath[mCurrentNodeId].y * Level.cTileSize + mLevel.transform.position.y);
 
 		nextDest = currentDest;
 
 		if (mPath.Count > mCurrentNodeId + 1)
 		{
-			nextDest = new Vector2(mPath[mCurrentNodeId + 1].x * mLevel.cTileSize + mLevel.transform.position.x,
-				mPath[mCurrentNodeId + 1].y * mLevel.cTileSize + mLevel.transform.position.y);
+			nextDest = new Vector2(mPath[mCurrentNodeId + 1].x * Level.cTileSize + mLevel.transform.position.x,
+				mPath[mCurrentNodeId + 1].y * Level.cTileSize + mLevel.transform.position.y);
 		}
 
 		destOnGround = false;
 
+		//TODO: This loop assumes we're checking width starting with the bottom left, but we're actually starting from the center
 		for (int x = mPath[mCurrentNodeId].x; x < mPath[mCurrentNodeId].x + width; ++x)
 		{
 			if (mLevel.IsGround(x, mPath[mCurrentNodeId].y - 1))
@@ -296,24 +434,37 @@ public class Unit : MonoBehaviour {
 			}
 		}
 
-		Vector2 pathPosition = mAABB.center - mAABB.size/2 + Vector2.one * mLevel.cTileSize * 0.5f;
+		//TODO: Turn this into just a Vector2 Method (Currently its grabbing the bottom center point of the unit, dunno if that's good)
+		Vector2 pathPosition = new Vector2(transform.position.x,transform.position.y - (height/2));//mAABB.center - (mAABB.size / 2) + Vector3.one * Level.cTileSize * 0.5f;
 
-		reachedX = (prevDest.x <= currentDest.x && pathPosition.x >= currentDest.x)
-			|| (prevDest.x >= currentDest.x && pathPosition.x <= currentDest.x);
+		reachedX = ReachedNodeOnXAxis(pathPosition, prevDest, currentDest);
+		reachedY = ReachedNodeOnYAxis(pathPosition, prevDest, currentDest);
 
 
+		//TODO: THIS KINDA DOESNT LOOK GOOD. Either fix jump height and physics or figure this one out
+		//snap the character if it reached the goal but overshot it by more than cBotMaxPositionError
 		if (reachedX && Mathf.Abs(pathPosition.x - currentDest.x) > Constants.cBotMaxPositionError && Mathf.Abs(pathPosition.x - currentDest.x) < Constants.cBotMaxPositionError*3.0f && !mPrevInputs[(int)KeyInput.GoRight] && !mPrevInputs[(int)KeyInput.GoLeft])
 		{
 			pathPosition.x = currentDest.x;
-			transform.position.x = pathPosition.x - mLevel.cTileSize * 0.5f + (mAABB.size.x/2)/* + mAABBOffset.x Not sure what mAABOfsset is supposed to be*/;
+			transform.position = new Vector3 (pathPosition.x/* - Level.cTileSize * 0.5f + mAABB.size.x/2 + mAABBOffset.x dunno how to use this*/, transform.position.y, transform.position.z);
 		}
-
-		reachedY = (prevDest.y <= currentDest.y && pathPosition.y >= currentDest.y)
-			|| (prevDest.y >= currentDest.y && pathPosition.y <= currentDest.y)
-			|| (Mathf.Abs(pathPosition.y - currentDest.y) <= Constants.cBotMaxPositionError);
 
 		if (destOnGround && !grounded)
 			reachedY = false;
+	}
+
+	public bool ReachedNodeOnXAxis(Vector2 pathPosition, Vector2 prevDest, Vector2 currentDest)
+	{
+		return (prevDest.x <= currentDest.x && pathPosition.x >= currentDest.x)
+			|| (prevDest.x >= currentDest.x && pathPosition.x <= currentDest.x)
+			|| Mathf.Abs(pathPosition.x - currentDest.x) <= Constants.cBotMaxPositionError;
+	}
+
+	public bool ReachedNodeOnYAxis(Vector2 pathPosition, Vector2 prevDest, Vector2 currentDest)
+	{
+		return (prevDest.y <= currentDest.y && pathPosition.y >= currentDest.y)
+			|| (prevDest.y >= currentDest.y && pathPosition.y <= currentDest.y)
+			|| (Mathf.Abs(pathPosition.y - currentDest.y) <= Constants.cBotMaxPositionError);
 	}
 
 	public int GetJumpFramesForNode(int prevNodeId)
@@ -333,5 +484,30 @@ public class Unit : MonoBehaviour {
 		}
 
 		return 0;
+	}
+
+	public void UpdatePrevInputs()
+	{
+		var count = (byte)KeyInput.Count;
+
+		for (byte i = 0; i < count; ++i)
+			mPrevInputs[i] = mInputs[i];
+	}
+
+	//Debug tool
+	protected void DrawPathLines(List<Vector2i> path) {
+		if (path != null && path.Count > 0) {
+			lineRenderer.enabled = true;
+			lineRenderer.SetVertexCount (path.Count);
+			lineRenderer.SetWidth (0.5f, 0.5f);
+
+			for (var i = 0; i < path.Count; ++i) {
+				lineRenderer.SetColors (Color.green, Color.green);
+				//Commenting out tile size because I've manually made the tiles big
+				lineRenderer.SetPosition (i, mLevel.transform.position + new Vector3 (path [i].x/* * cTileSize*/, path [i].y/* * cTileSize*/, -5.0f));
+			}
+		} else {
+			lineRenderer.enabled = false;
+		}
 	}
 }

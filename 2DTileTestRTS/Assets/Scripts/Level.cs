@@ -48,7 +48,7 @@ public class Level : MonoBehaviour {
 	/// <summary>
 	/// The size of a tile in pixels.
 	/// </summary>
-	static public int cTileSize = 16;
+	static public int cTileSize = 1;
 
 	private LineRenderer lineRenderer;
 	public LayerMask playerLayerMask;
@@ -112,8 +112,9 @@ public class Level : MonoBehaviour {
 			if (foundClick && foundPlayer) {
 				Vector2i start = new Vector2i(Convert.ToInt32(playerPosition.x), Convert.ToInt32(playerPosition.y));
 				Vector2i end = new Vector2i(Convert.ToInt32(clickPosition.x), Convert.ToInt32(clickPosition.y));
-				List<Vector2i> path = mPathFinder.FindPath (start, end, player.GetComponent<Unit>().width, player.GetComponent<Unit>().height, player.GetComponent<Unit>().maxJumpHeight);
+				List<Vector2i> path = mPathFinder.FindPath (start, end, player.GetComponent<Unit>().width, player.GetComponent<Unit>().height, (short)player.GetComponent<Unit>().maxJumpHeight);
 				DrawPathLines(path);
+				player.GetComponent<Unit>().MoveTo(end);
 			}
 		}
 	}
@@ -425,14 +426,15 @@ public class Level : MonoBehaviour {
 	public void GetMapTileAtPoint(Vector2 point, out int tileIndexX, out int tileIndexY)
 	{
 		//position was originally assumed to be the worlds map position starting from bottom left corner. I don't know if what I'm doing will fix that
-		tileIndexY =(int)((point.y - transform.position.y + cTileSize/2.0f)/(float)(cTileSize));
-		tileIndexX =(int)((point.x - transform.position.x + cTileSize/2.0f)/(float)(cTileSize));
+		tileIndexY =(int)((point.y - transform.position.y/* + cTileSize/2.0f*/)/(float)(cTileSize));
+		tileIndexX =(int)((point.x - transform.position.x/* + cTileSize/2.0f*/)/(float)(cTileSize));
 	}
 
 	public Vector2i GetMapTileAtPoint(Vector2 point)
 	{
-		return new Vector2i((int)((point.x - transform.position.x + cTileSize/2.0f)/(float)(cTileSize)),
-			(int)((point.y - transform.position.y + cTileSize/2.0f)/(float)(cTileSize)));
+		return new Vector2i ((int)(point.x - transform.position.x), (int)(point.y - transform.position.y));
+//		return new Vector2i((int)((point.x - transform.position.x + cTileSize/2.0f)/(float)(cTileSize)),
+//			(int)((point.y - transform.position.y + cTileSize/2.0f)/(float)(cTileSize)));
 	}
 
 	public Vector2 GetMapTilePosition(int tileIndexX, int tileIndexY)
@@ -529,7 +531,7 @@ public class Level : MonoBehaviour {
 		if (path != null && path.Count > 0) {
 			lineRenderer.enabled = true;
 			lineRenderer.SetVertexCount (path.Count);
-			lineRenderer.SetWidth (1.0f, 1.0f);
+			lineRenderer.SetWidth (0.3f, 0.3f);
 
 			for (var i = 0; i < path.Count; ++i) {
 				lineRenderer.SetColors (Color.red, Color.red);
