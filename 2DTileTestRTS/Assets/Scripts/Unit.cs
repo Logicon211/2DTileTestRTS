@@ -166,7 +166,8 @@ public class Unit : MonoBehaviour {
 		var position = mAABB.center;
 		position.y -= (mAABB.size.y/2);
 
-		mLevel.GetMapTileAtPoint(position, out tileX, out tileY);
+		//This nulls out on map startup. Should probably do this in the MoveTo method;
+		//mLevel.GetMapTileAtPoint(position, out tileX, out tileY);
 
 		int characterHeight = height;//Mathf.CeilToInt(mAABB.size.y*2.0f/Level.cTileSize);
 
@@ -188,6 +189,8 @@ public class Unit : MonoBehaviour {
 		case BotState.MoveTo:
 			Vector2 prevDest, currentDest, nextDest;
 			bool destOnGround, reachedY, reachedX;
+
+			mLevel.GetMapTileAtPoint(position, out tileX, out tileY);
 			GetContext (out prevDest, out currentDest, out nextDest, out destOnGround, out reachedX, out reachedY);
 
 			//TODO: Turn this into just a Vector2 Method (Currently its grabbing the bottom center point of the unit, dunno if that's good)

@@ -53,6 +53,9 @@ public class Level : MonoBehaviour {
 	private LineRenderer lineRenderer;
 	public LayerMask playerLayerMask;
 
+	void Awake() {
+		mainLevel = this;
+	}
 
 	// Use this for initialization
 	void Start () {
