@@ -235,13 +235,13 @@ namespace Algorithms
 				
 				var inSolidTile = false;
 
-				for (var i = 0; i < characterWidth; ++i)
+				//This starts at the bottom left and checks rightward for intervening ground nodes. If it's empty we're good. If it's not we move to the left a bit to try again
+				for (var i = 0; i < characterWidth/2; ++i)
 				{
 					inSolidTile = false;
 					for (var w = 0; w < characterWidth; ++w)
 					{
-						if ((end.x + w < 0 || end.x + w >= mLevel.mWidth) || mGrid[end.x + w, end.y] != null
-							|| mGrid[end.x + w, end.y + characterHeight - 1] != null)
+						if ((end.x + w < 0 || end.x + w >= mLevel.mWidth) || mGrid[end.x + w, end.y] != null || mGrid[end.x + w, end.y + characterHeight - 1] != null)
 						{
 							inSolidTile = true;
 							break;
@@ -252,8 +252,7 @@ namespace Algorithms
 					{
 						for (var h = 1; h < characterHeight - 1; ++h)
 						{
-							if ((end.y + h < 0 || end.y + h >= mLevel.mHeight) || mGrid[end.x, end.y + h] != null
-								|| mGrid[end.x + characterWidth - 1, end.y + h] != null)
+							if ((end.y + h < 0 || end.y + h >= mLevel.mHeight) || mGrid[end.x, end.y + h] != null || mGrid[end.x + characterWidth - 1, end.y + h] != null)
 							{
 								inSolidTile = true;
 								break;
@@ -261,6 +260,7 @@ namespace Algorithms
 						}
 					}
 
+					//TODO: end.x -= characterWidth - 1 is going waaay to far to the left in order to get a valid end spot I think
 					if (inSolidTile)
 						end.x -= characterWidth - 1;
 					else
@@ -292,6 +292,7 @@ namespace Algorithms
 
 				bool startsOnGround = false;
 
+				//TODO: Check character width from bottom center instead of bottom left
 				for (int x = start.x; x < start.x + characterWidth; ++x)
 				{
 					if (mLevel.IsGround(x, start.y - 1))
@@ -350,6 +351,7 @@ namespace Algorithms
 						var onGround = false;
 						var atCeiling = false;
 
+						//TODO: Check character with from bottom center instead of bottom left
 						for (var w = 0; w < characterWidth; ++w)
 						{
 							if (mGrid[mNewLocationX + w, mNewLocationY] != null

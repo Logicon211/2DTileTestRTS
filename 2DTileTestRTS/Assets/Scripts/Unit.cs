@@ -9,7 +9,7 @@ public class Unit : MonoBehaviour {
 
 	public bool facingRight = true;
 	public float speed = 10f;
-	public float jumpSpeed = 20f;
+	public float jumpSpeed = 40f;
 
 	public int maxJumpHeight = 6;
 
@@ -90,9 +90,13 @@ public class Unit : MonoBehaviour {
 		anim = GetComponent<Animator> ();
 		float move = Input.GetAxis ("Horizontal");
 
+		bool continueJumping = false;
+
 		// If the jump button is pressed and the player is grounded then the player should jump.
 		if (Input.GetAxis ("Vertical") > 0 && grounded) {
 			jump = true;
+		} else if (Input.GetAxis ("Vertical") > 0 && !grounded) {
+			continueJumping = true;
 		}
 
 		//Bot control reading
@@ -104,8 +108,10 @@ public class Unit : MonoBehaviour {
 			move = -1;
 		}
 		
-		if (mInputs [(int)KeyInput.Jump]) {
+		if (mInputs [(int)KeyInput.Jump] && grounded) {
 			jump = true;
+		} else if (mInputs [(int)KeyInput.Jump] && !grounded) {
+			continueJumping = true;
 		}
 
 		if (move != 0/*Input.GetKey(KeyCode.RightArrow*/) {
@@ -122,13 +128,22 @@ public class Unit : MonoBehaviour {
 			anim.SetBool ("Moving", true);
 		} else {
 			anim.SetBool ("Moving", false);
+			//Stop left or right movement when those keys aren't pressed
+			RB.velocity = new Vector2 (0f, RB.velocity.y);
 		}
 
+
 		if (jump) {
-			//RB.AddForce(new Vector2(0f, jumpForce));
 			RB.velocity = new Vector2 (RB.velocity.x, jumpSpeed);
 			anim.SetBool ("Jumping", true);
 			jump = false; //reset the jump flag so it doesn't happen again immediately
+		}
+
+		//This should make it so holding the jump button causes a higher jump (May need to tweek this a bit)
+		if (continueJumping && RB.velocity.y > 0) {
+			RB.gravityScale = 0.3f;
+		} else {
+			RB.gravityScale = 1f;
 		}
 
 		//Need to update old position after update
@@ -176,12 +191,13 @@ public class Unit : MonoBehaviour {
 		switch (mCurrentBotState)
 		{
 		case BotState.None:
-			TestJumpValues();
+			TestJumpValues ();
 
-			if (mFramesOfJumping > 0)
-			{
+			if (mFramesOfJumping > 0) {
 				mFramesOfJumping -= 1;
-				mInputs[(int)KeyInput.Jump] = true;
+				mInputs [(int)KeyInput.Jump] = true;
+			} else {
+				mInputs [(int)KeyInput.Jump] = false;
 			}
 
 			break;
@@ -291,6 +307,8 @@ public class Unit : MonoBehaviour {
 			mFramesOfJumping = GetJumpFrameCount(5);
 		else if (Input.GetKeyDown(KeyCode.Alpha6))
 			mFramesOfJumping = GetJumpFrameCount(6);
+		else if (Input.GetKeyDown(KeyCode.Alpha7))
+			mFramesOfJumping = GetJumpFrameCount(7);
 	}
 
 	public void ChangeState(BotState newState)
@@ -309,17 +327,19 @@ public class Unit : MonoBehaviour {
 			case 1:
 				return 1;
 			case 2:
-				return 2;
+				return 4;
 			case 3:
-				return 5;
-			case 4:
 				return 8;
+			case 4:
+				return 12;
 			case 5:
-				return 14;
+				return 20;
 			case 6:
-				return 21;
+				return 28;
+			case 7:
+				return 34;
 			default:
-				return 30;
+				return 40;
 			}
 		}
 	}
@@ -348,7 +368,7 @@ public class Unit : MonoBehaviour {
 		Vector2i startTile = getTopOfGroundTileBelowTile(centerUnitTile);
 		//Vector2i startTile = mLevel.GetMapTileAtPoint(mAABBCenter - mAABBHalfSize/* + Vector2.one * Level.cTileSize * 0.5f*/);
 
-		Debug.DrawLine (new Vector3 (startTile.x, startTile.y, 1), new Vector3 (startTile.x, startTile.y + 1, 1), Color.blue, 1000.0f, false);
+		//Debug.DrawLine (new Vector3 (startTile.x, startTile.y, 1), new Vector3 (startTile.x, startTile.y + 1, 1), Color.blue, 1000.0f, false);
 
 		if (grounded && !IsOnGroundAndFitsPos(startTile))
 		{
@@ -428,9 +448,27 @@ public class Unit : MonoBehaviour {
 		destOnGround = false;
 
 		//TODO: This loop assumes we're checking width starting with the bottom left, but we're actually starting from the center
-		for (int x = mPath[mCurrentNodeId].x; x < mPath[mCurrentNodeId].x + width; ++x)
-		{
-			if (mLevel.IsGround(x, mPath[mCurrentNodeId].y - 1))
+//		for (int x = mPath[mCurrentNodeId].x; x < mPath[mCurrentNodeId].x + width; ++x)
+//		{
+//			//if y-1 is ground but y also is ground then it's not a valid ground spot I think
+//			if (mLevel.IsGround(x, mPath[mCurrentNodeId].y - 1))
+//			{
+//				destOnGround = true;
+//				break;
+//			}
+//		}
+
+		//Middle origin ground check try:
+		int currentNodeX = mPath[mCurrentNodeId].x;
+		for (int i = 0; i < (int)Mathf.Floor(width / 2); i++) {
+			//if y-1 is ground but y also is ground then it's not a valid ground spot I think
+			if (mLevel.IsGround(mPath[mCurrentNodeId].x+i, mPath[mCurrentNodeId].y - 1))
+			{
+				destOnGround = true;
+				break;
+			}
+			//if y-1 is ground but y also is ground then it's not a valid ground spot I think
+			if (mLevel.IsGround(mPath[mCurrentNodeId].x-i, mPath[mCurrentNodeId].y - 1))
 			{
 				destOnGround = true;
 				break;
@@ -481,7 +519,8 @@ public class Unit : MonoBehaviour {
 			{
 				if (mPath[i].y - mPath[prevNodeId].y >= jumpHeight)
 					jumpHeight = mPath[i].y - mPath[prevNodeId].y;
-				if (mPath[i].y - mPath[prevNodeId].y < jumpHeight || !mLevel.IsGround(mPath[i].x, mPath[i].y - 1))
+				//My code snippet here is to detect whether or not the previou node isn't directly below the next node (Because if it is then it's just the start of the jump node)
+				if ((mPath[i].y - mPath[prevNodeId].y < jumpHeight || mLevel.IsGround(mPath[i].x, mPath[i].y - 1))/* && ((mPath[i].x != mPath[prevNodeId].x && mPath[i].y != mPath[prevNodeId].y+1))*/)
 					return GetJumpFrameCount(jumpHeight);
 			}
 		}
