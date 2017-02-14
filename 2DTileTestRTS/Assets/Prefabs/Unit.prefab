@@ -45,7 +45,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 135260}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 289.4, y: 370.2, z: 0}
+  m_LocalPosition: {x: 157.18, y: 391.48, z: 0}
   m_LocalScale: {x: 2.3452332, y: 2.3452332, z: 2.3452332}
   m_Children:
   - {fileID: 4000013262499278}
@@ -61,7 +61,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 112068}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.31, y: -1.1399995, z: 0}
+  m_LocalPosition: {x: 0.551, y: -1.1399995, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 449214}
@@ -93,14 +93,14 @@ BoxCollider2D:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 135260}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_UsedByEffector: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.0031685675, y: -0.004788636}
   serializedVersion: 2
-  m_Size: {x: 1.53, y: 2.08}
+  m_Size: {x: 1.2552806, y: 2.089574}
 --- !u!95 &9566954
 Animator:
   serializedVersion: 3
@@ -132,10 +132,10 @@ MonoBehaviour:
   jump: 0
   facingRight: 1
   speed: 10
-  jumpSpeed: 12
+  jumpSpeed: 20
   maxJumpHeight: 6
   width: 4
-  height: 6
+  height: 5
   mAABB:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 0, y: 0, z: 0}
@@ -237,7 +237,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000011660988484}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.31, y: -1.14, z: 0}
+  m_LocalPosition: {x: -0.583, y: -1.14, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 449214}
@@ -263,7 +263,7 @@ PolygonCollider2D:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 135260}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 0
@@ -273,13 +273,9 @@ PolygonCollider2D:
     m_Paths:
     - - {x: -0.1871244, y: -0.9751283}
       - {x: 0.18712442, y: -0.9762962}
-      - {x: 0.72297996, y: -0.18309051}
-      - {x: 0.315, y: -0.24}
-      - {x: 0.505, y: 0.08}
-      - {x: 0.545, y: 0.03}
-      - {x: 0.72499996, y: -0.14999999}
-      - {x: 0.765, y: -0.14}
-      - {x: 0.765, y: 0.31}
+      - {x: 0.8502822, y: -0.4275029}
+      - {x: 0.84721124, y: -0.4198775}
+      - {x: 0.80064565, y: -0.06871953}
       - {x: 0.695, y: 0.51}
       - {x: 0.555, y: 0.64}
       - {x: 0.445, y: 0.66999996}
@@ -293,12 +289,7 @@ PolygonCollider2D:
       - {x: -0.645, y: 0.45999998}
       - {x: -0.715, y: 0.32999998}
       - {x: -0.765, y: 0.14999999}
-      - {x: -0.765, y: -0.04}
-      - {x: -0.715, y: -0.049999997}
-      - {x: -0.42499998, y: 0.12}
-      - {x: -0.385, y: -0.03}
-      - {x: -0.305, y: -0.21}
-      - {x: -0.69910187, y: -0.11982489}
+      - {x: -0.85186976, y: -0.42535582}
 --- !u!114 &114000010110591058
 MonoBehaviour:
   m_ObjectHideFlags: 1

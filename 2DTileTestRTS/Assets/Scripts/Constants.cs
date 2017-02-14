@@ -11,5 +11,5 @@ public class Constants
 
     public const int cJumpFramesThreshold = 4;
 
-    public const float cBotMaxPositionError = 0.4f;
+    public const float cBotMaxPositionError = 0.1f;
 }

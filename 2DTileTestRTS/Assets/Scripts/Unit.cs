@@ -23,6 +23,9 @@ public class Unit : MonoBehaviour {
 	private Transform groundCheck1;
 	private Transform groundCheck2;
 	private bool grounded = false;			// Whether or not the player is grounded.
+	public float groundTimer = 0f;
+
+	public static float MAX_GROUNDED_TIMER = 2f;
 
 	//Bot code. May move out of here?
 	public enum BotState
@@ -46,7 +49,6 @@ public class Unit : MonoBehaviour {
 	}
 
 	private Level mLevel;
-	public Bounds mAABB;
 	private List<Vector2i> mPath;
 	private int mFramesOfJumping;
 	private Vector2 mOldPosition;
@@ -60,7 +62,6 @@ public class Unit : MonoBehaviour {
 
 		mLevel = Level.getLevel ();
 		RB = GetComponent<Rigidbody2D>();
-		mAABB = GetComponent<SpriteRenderer> ().bounds;
 		groundCheck1 = transform.FindChild ("groundCheck1");
 		groundCheck2 = transform.FindChild ("groundCheck2");
 		mCurrentBotState = BotState.None;
@@ -73,18 +74,28 @@ public class Unit : MonoBehaviour {
 	}
 
 	void Update() {
+	}
+	
+	// Update is called once per frame
+	void FixedUpdate () {
+		//Jump checks
 		// The player is grounded if a linecast to the groundcheck position hits anything on the ground layer.
 		bool grounded1 = Physics2D.Linecast(transform.position, groundCheck1.position, 1 << LayerMask.NameToLayer("Ground")); 
 		bool grounded2 = Physics2D.Linecast(transform.position, groundCheck2.position, 1 << LayerMask.NameToLayer("Ground"));
 		//Check in between the 2 ground checks
 		bool grounded3 = Physics2D.Linecast(groundCheck1.position, groundCheck2.position, 1 << LayerMask.NameToLayer("Ground"));
+
 		grounded = grounded1 || grounded2 || grounded3;
-		
-		mAABB = GetComponent<SpriteRenderer> ().bounds;
-	}
-	
-	// Update is called once per frame
-	void FixedUpdate () {
+		if (!grounded) {
+			groundTimer += Time.fixedDeltaTime;
+			if (groundTimer < MAX_GROUNDED_TIMER) {
+				grounded = true;
+			}
+		} else {
+			groundTimer = 0f;
+		}
+
+		/**********************************************************************************************************************/
 		BotUpdate ();
 
 		anim = GetComponent<Animator> ();
@@ -137,6 +148,7 @@ public class Unit : MonoBehaviour {
 			RB.velocity = new Vector2 (RB.velocity.x, jumpSpeed);
 			anim.SetBool ("Jumping", true);
 			jump = false; //reset the jump flag so it doesn't happen again immediately
+			groundTimer = MAX_GROUNDED_TIMER;//reset groundTimer to MAX_GROUNDED_TIMER so that it registers that we've used our 1 jump after stepping off a ledge
 		}
 
 		//This should make it so holding the jump button causes a higher jump (May need to tweek this a bit)
@@ -178,8 +190,8 @@ public class Unit : MonoBehaviour {
 	{
 		//get the position of the bottom of the bot's aabb, this will be much more useful than the center of the sprite (mPosition)
 		int tileX, tileY;
-		var position = mAABB.center;
-		position.y -= (mAABB.size.y/2);
+		var position = transform.position;
+		position.y -= (height/2f);
 
 		//This nulls out on map startup. Should probably do this in the MoveTo method;
 		//mLevel.GetMapTileAtPoint(position, out tileX, out tileY);
@@ -348,6 +360,11 @@ public class Unit : MonoBehaviour {
 	public Vector2i getTopOfGroundTileBelowTile(Vector2i mapPos)
 	{
 		//TODO: Need to check if there is NO ground tile below passed in point
+		RaycastHit2D groundHit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y), new Vector2(0, -1), Mathf.Infinity, mLevel.playerLayerMask);
+		if (groundHit.collider == null) {
+			//If there's no ground right below this unit just return the passed in cordinate instead
+			return mapPos;
+		}
 
 		while (!(mLevel.IsGround(mapPos.x, mapPos.y)))
 			--mapPos.y;
@@ -357,18 +374,23 @@ public class Unit : MonoBehaviour {
 
 	public void MoveTo(Vector2i destination)
 	{
-		//clear old path;
-		mPath.Clear();
+		//Reset Bot State and clear old path;
+		clearPathAndBotState();
 
 		//TODO: Try to use an actual AABB object eventually (Bounding Box)
 		//Vector2 mAABBCenter = new Vector2(transform.position.x, transform.position.y);
 		//Vector2 mAABBHalfSize = new Vector2(width/2, height/2);
 
-		Vector2i centerUnitTile = mLevel.GetMapTileAtPoint (new Vector2 (transform.position.x, transform.position.y));
-		Vector2i startTile = getTopOfGroundTileBelowTile(centerUnitTile);
-		//Vector2i startTile = mLevel.GetMapTileAtPoint(mAABBCenter - mAABBHalfSize/* + Vector2.one * Level.cTileSize * 0.5f*/);
+		Vector2i startTile;
 
-		//Debug.DrawLine (new Vector3 (startTile.x, startTile.y, 1), new Vector3 (startTile.x, startTile.y + 1, 1), Color.blue, 1000.0f, false);
+		if (grounded) {
+			startTile = mLevel.GetMapTileAtPoint (new Vector2 (transform.position.x, transform.position.y - height/2f + 1));
+			Debug.DrawLine (new Vector3 (startTile.x, startTile.y, 1), new Vector3 (startTile.x, startTile.y + 1, 1), Color.blue);
+		} else {
+			Vector2i centerUnitTile = mLevel.GetMapTileAtPoint (new Vector2 (transform.position.x, transform.position.y - (height/2) + 1));
+			startTile = getTopOfGroundTileBelowTile(centerUnitTile);
+		}
+		//Vector2i startTile = mLevel.GetMapTileAtPoint(mAABBCenter - mAABBHalfSize/* + Vector2.one * Level.cTileSize * 0.5f*/);
 
 		if (grounded && !IsOnGroundAndFitsPos(startTile))
 		{
@@ -384,8 +406,6 @@ public class Unit : MonoBehaviour {
 			destination,
 			width,
 			height,
-			//Mathf.CeilToInt((mAABB.size.x/2)/ 8.0f), 
-			//Mathf.CeilToInt((mAABB.size.y/2) / 8.0f), 
 			(short)maxJumpHeight);
 
 		if (path != null && path.Count > 1)
@@ -460,7 +480,7 @@ public class Unit : MonoBehaviour {
 
 		//Middle origin ground check try:
 		int currentNodeX = mPath[mCurrentNodeId].x;
-		for (int i = 0; i < (int)Mathf.Floor(width / 2); i++) {
+		for (int i = 0; i < (int)Mathf.FloorToInt(width / 2); i++) {
 			//if y-1 is ground but y also is ground then it's not a valid ground spot I think
 			if (mLevel.IsGround(mPath[mCurrentNodeId].x+i, mPath[mCurrentNodeId].y - 1))
 			{
@@ -477,6 +497,8 @@ public class Unit : MonoBehaviour {
 
 		//TODO: Turn this into just a Vector2 Method (Currently its grabbing the bottom center point of the unit, dunno if that's good)
 		Vector2 pathPosition = new Vector2(transform.position.x,transform.position.y - (height/2));//mAABB.center - (mAABB.size / 2) + Vector3.one * Level.cTileSize * 0.5f;
+
+		Debug.DrawLine (new Vector3 (pathPosition.x, pathPosition.y, 1), new Vector3 (pathPosition.x, pathPosition.y + 1, 1), Color.blue);
 
 		reachedX = ReachedNodeOnXAxis(pathPosition, prevDest, currentDest);
 		reachedY = ReachedNodeOnYAxis(pathPosition, prevDest, currentDest);
@@ -534,6 +556,15 @@ public class Unit : MonoBehaviour {
 
 		for (byte i = 0; i < count; ++i)
 			mPrevInputs[i] = mInputs[i];
+	}
+
+	public void clearPathAndBotState() {
+		ChangeState(BotState.None);
+		mPath.Clear();
+		mInputs [(int)KeyInput.GoRight] = false;
+		mInputs [(int)KeyInput.GoLeft] = false;
+		mInputs [(int)KeyInput.Jump] = false;
+		mInputs [(int)KeyInput.GoDown] = false;
 	}
 
 	//Debug tool

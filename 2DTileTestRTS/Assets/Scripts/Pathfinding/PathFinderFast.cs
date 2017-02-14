@@ -236,12 +236,51 @@ namespace Algorithms
 				var inSolidTile = false;
 
 				//This starts at the bottom left and checks rightward for intervening ground nodes. If it's empty we're good. If it's not we move to the left a bit to try again
-				for (var i = 0; i < characterWidth/2; ++i)
+//				for (var i = 0; i < characterWidth; ++i)
+//				{
+//					inSolidTile = false;
+//					for (var w = 0; w < characterWidth; ++w)
+//					{
+//						if ((end.x + w < 0 || end.x + w >= mLevel.mWidth) || mGrid[end.x + w, end.y] != null || mGrid[end.x + w, end.y + characterHeight - 1] != null)
+//						{
+//							inSolidTile = true;
+//							break;
+//						}
+//
+//					}
+//					if (inSolidTile == false)
+//					{
+//						for (var h = 1; h < characterHeight - 1; ++h)
+//						{
+//							if ((end.y + h < 0 || end.y + h >= mLevel.mHeight) || mGrid[end.x, end.y + h] != null || mGrid[end.x + characterWidth - 1, end.y + h] != null)
+//							{
+//								inSolidTile = true;
+//								break;
+//							}
+//						}
+//					}
+//
+//					//TODO: end.x -= characterWidth - 1 is going waaay to far to the left in order to get a valid end spot I think
+//					if (inSolidTile)
+//						end.x -= /*characterWidth -*/ 1;
+//					else
+//						break;
+//				}
+
+				//Trying to Check from character center outward
+				int halfWidth = Mathf.FloorToInt(characterWidth/2);
+				int origX = end.x;
+				for (var i = 1; i < characterWidth+1; ++i)
 				{
 					inSolidTile = false;
-					for (var w = 0; w < characterWidth; ++w)
+					for (var w = 0; w <= halfWidth; ++w)
 					{
 						if ((end.x + w < 0 || end.x + w >= mLevel.mWidth) || mGrid[end.x + w, end.y] != null || mGrid[end.x + w, end.y + characterHeight - 1] != null)
+						{
+							inSolidTile = true;
+							break;
+						}
+						if ((end.x - w < 0 || end.x - w >= mLevel.mWidth) || mGrid[end.x - w, end.y] != null || mGrid[end.x - w, end.y + characterHeight - 1] != null)
 						{
 							inSolidTile = true;
 							break;
@@ -252,7 +291,7 @@ namespace Algorithms
 					{
 						for (var h = 1; h < characterHeight - 1; ++h)
 						{
-							if ((end.y + h < 0 || end.y + h >= mLevel.mHeight) || mGrid[end.x, end.y + h] != null || mGrid[end.x + characterWidth - 1, end.y + h] != null)
+							if ((end.y + h < 0 || end.y + h >= mLevel.mHeight) || mGrid[end.x - halfWidth, end.y + h] != null || mGrid[end.x + halfWidth, end.y + h] != null)
 							{
 								inSolidTile = true;
 								break;
@@ -260,11 +299,16 @@ namespace Algorithms
 						}
 					}
 
-					//TODO: end.x -= characterWidth - 1 is going waaay to far to the left in order to get a valid end spot I think
-					if (inSolidTile)
-						end.x -= characterWidth - 1;
-					else
+					if (inSolidTile) {
+						if (i % 2 == 0) {
+							end.x = origX + (i / 2);
+						} else {
+							float iHalf = i / 2f;
+							end.x = origX - Mathf.CeilToInt (iHalf);
+						}
+					} else {
 						break;
+					}
 				}
 
 				if (inSolidTile == true)
@@ -352,22 +396,59 @@ namespace Algorithms
 						var atCeiling = false;
 
 						//TODO: Check character with from bottom center instead of bottom left
-						for (var w = 0; w < characterWidth; ++w)
-						{
-							if (mGrid[mNewLocationX + w, mNewLocationY] != null
-								|| mGrid[mNewLocationX + w, mNewLocationY + characterHeight - 1] != null)
-								goto CHILDREN_LOOP_END;
+//						for (var w = 0; w < characterWidth; ++w)
+//						{
+//							if (mGrid[mNewLocationX + w, mNewLocationY] != null
+//								|| mGrid[mNewLocationX + w, mNewLocationY + characterHeight - 1] != null)
+//								goto CHILDREN_LOOP_END;
+//
+//							if (mLevel.IsGround(mNewLocationX + w, mNewLocationY - 1))
+//								onGround = true;
+//							else if (mGrid[mNewLocationX + w, mNewLocationY + characterHeight] != null)
+//								atCeiling = true;
+//						}
+//						for (var h = 1; h < characterHeight - 1; ++h)
+//						{
+//							if (mGrid[mNewLocationX, mNewLocationY + h] != null
+//								|| mGrid[mNewLocationX + characterWidth - 1, mNewLocationY + h] != null)
+//								goto CHILDREN_LOOP_END;
+//						}
 
-							if (mLevel.IsGround(mNewLocationX + w, mNewLocationY - 1))
-								onGround = true;
-							else if (mGrid[mNewLocationX + w, mNewLocationY + characterHeight] != null)
-								atCeiling = true;
-						}
-						for (var h = 1; h < characterHeight - 1; ++h)
-						{
-							if (mGrid[mNewLocationX, mNewLocationY + h] != null
-								|| mGrid[mNewLocationX + characterWidth - 1, mNewLocationY + h] != null)
-								goto CHILDREN_LOOP_END;
+						//Trying to check from center out
+						try {
+							//int halfWidth = Mathf.FloorToInt(characterWidth/2);
+							for (var w = 0; w <= halfWidth; ++w)
+							{
+								if (mGrid[mNewLocationX + w, mNewLocationY] != null
+									|| mGrid[mNewLocationX + w, mNewLocationY + characterHeight - 1] != null)
+									goto CHILDREN_LOOP_END;
+
+								if (mLevel.IsGround(mNewLocationX + w, mNewLocationY - 1))
+									onGround = true;
+								else if (mGrid[mNewLocationX + w, mNewLocationY + characterHeight] != null)
+									atCeiling = true;
+
+								//Checking Other side of character center
+								if (mGrid[mNewLocationX - w, mNewLocationY] != null
+									|| mGrid[mNewLocationX - w, mNewLocationY + characterHeight - 1] != null)
+									goto CHILDREN_LOOP_END;
+
+								if (mLevel.IsGround(mNewLocationX - w, mNewLocationY - 1))
+									onGround = true;
+								else if (mGrid[mNewLocationX - w, mNewLocationY + characterHeight] != null)
+									atCeiling = true;
+
+							}
+							for (var h = 1; h < characterHeight - 1; ++h)
+							{
+									if (mGrid[mNewLocationX - halfWidth, mNewLocationY + h] != null
+										|| mGrid[mNewLocationX + halfWidth/* characterWidth - 1*/, mNewLocationY + h] != null)
+										goto CHILDREN_LOOP_END;
+								
+							}
+						} catch (IndexOutOfRangeException e) {
+							//Index out of range exception just means we're checking past the map bounds. Ignore the proposed node
+							goto CHILDREN_LOOP_END;
 						}
 
 						//calculate a proper jumplength value for the successor

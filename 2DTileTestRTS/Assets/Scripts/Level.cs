@@ -104,19 +104,19 @@ public class Level : MonoBehaviour {
 			Vector2 player2DPosition = new Vector2 (player.transform.position.x, player.transform.position.y);
 			RaycastHit2D playerHit = Physics2D.Raycast(player2DPosition, new Vector2(0, -1), Mathf.Infinity, playerLayerMask);
 
-			if (playerHit.collider != null) {
-				MapTile tile = playerHit.collider.gameObject.GetComponent<MapTile> ();
-				if (tile != null) {
-					playerPosition = new Vector2(tile.x , tile.y + 1);
-					foundPlayer = true;
-				}
-			}
+//			if (playerHit.collider != null) {
+//				MapTile tile = playerHit.collider.gameObject.GetComponent<MapTile> ();
+//				if (tile != null) {
+//					playerPosition = new Vector2(tile.x , tile.y + 1);
+//					foundPlayer = true;
+//				}
+//			}
 
-			if (foundClick && foundPlayer) {
+			if (foundClick/* && foundPlayer*/) {
 				Vector2i start = new Vector2i(Convert.ToInt32(playerPosition.x), Convert.ToInt32(playerPosition.y));
 				Vector2i end = new Vector2i(Convert.ToInt32(clickPosition.x), Convert.ToInt32(clickPosition.y));
-				List<Vector2i> path = mPathFinder.FindPath (start, end, player.GetComponent<Unit>().width, player.GetComponent<Unit>().height, (short)player.GetComponent<Unit>().maxJumpHeight);
-				DrawPathLines(path);
+				//List<Vector2i> path = mPathFinder.FindPath (start, end, player.GetComponent<Unit>().width, player.GetComponent<Unit>().height, (short)player.GetComponent<Unit>().maxJumpHeight);
+				//DrawPathLines(path);
 				player.GetComponent<Unit>().MoveTo(end);
 			}
 		}
