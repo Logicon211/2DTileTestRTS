@@ -233,7 +233,7 @@ namespace Algorithms
                 while (touchedLocations.Count > 0)
                     nodes[touchedLocations.Pop()].Clear();
 				
-				var inSolidTile = false;
+				var inSolidTile = true;
 
 				//This starts at the bottom left and checks rightward for intervening ground nodes. If it's empty we're good. If it's not we move to the left a bit to try again
 //				for (var i = 0; i < characterWidth; ++i)
@@ -267,47 +267,56 @@ namespace Algorithms
 //						break;
 //				}
 
-				//Trying to Check from character center outward
+				//Checking if the Endpoint is too small to fit the character
+				//Trying to Check from character center outward (shifting left, then right 1 tile at a time
+				//If that fails then keep moving the endpoint up until you have a valid endpoint, or you hit the top of the map (Should probably limit this to a certain number of tries)
 				int halfWidth = Mathf.FloorToInt(characterWidth/2);
 				int origX = end.x;
-				for (var i = 1; i < characterWidth+1; ++i)
-				{
-					inSolidTile = false;
-					for (var w = 0; w <= halfWidth; ++w)
+				while(inSolidTile || end.y >= mLevel.mHeight - characterHeight) {
+					for (var i = 1; i < characterWidth+1; ++i)
 					{
-						if ((end.x + w < 0 || end.x + w >= mLevel.mWidth) || mGrid[end.x + w, end.y] != null || mGrid[end.x + w, end.y + characterHeight - 1] != null)
+						inSolidTile = false;
+						for (var w = 0; w <= halfWidth; ++w)
 						{
-							inSolidTile = true;
-							break;
-						}
-						if ((end.x - w < 0 || end.x - w >= mLevel.mWidth) || mGrid[end.x - w, end.y] != null || mGrid[end.x - w, end.y + characterHeight - 1] != null)
-						{
-							inSolidTile = true;
-							break;
-						}
-
-					}
-					if (inSolidTile == false)
-					{
-						for (var h = 1; h < characterHeight - 1; ++h)
-						{
-							if ((end.y + h < 0 || end.y + h >= mLevel.mHeight) || mGrid[end.x - halfWidth, end.y + h] != null || mGrid[end.x + halfWidth, end.y + h] != null)
+							if ((end.x + w < 0 || end.x + w >= mLevel.mWidth) || mGrid[end.x + w, end.y] != null || mGrid[end.x + w, end.y + characterHeight - 1] != null)
 							{
 								inSolidTile = true;
 								break;
 							}
+							if ((end.x - w < 0 || end.x - w >= mLevel.mWidth) || mGrid[end.x - w, end.y] != null || mGrid[end.x - w, end.y + characterHeight - 1] != null)
+							{
+								inSolidTile = true;
+								break;
+							}
+
+						}
+						if (inSolidTile == false)
+						{
+							for (var h = 1; h < characterHeight - 1; ++h)
+							{
+								if ((end.y + h < 0 || end.y + h >= mLevel.mHeight) || mGrid[end.x - halfWidth, end.y + h] != null || mGrid[end.x + halfWidth, end.y + h] != null)
+								{
+									inSolidTile = true;
+									break;
+								}
+							}
+						}
+
+						if (inSolidTile) {
+							if (i % 2 == 0) {
+								end.x = origX + (i / 2);
+							} else {
+								float iHalf = i / 2f;
+								end.x = origX - Mathf.CeilToInt (iHalf);
+							}
+						} else {
+							break;
 						}
 					}
 
+					//If we're still in a space too small. Move the endpoint up one and check there (Possibly extremely inefficient
 					if (inSolidTile) {
-						if (i % 2 == 0) {
-							end.x = origX + (i / 2);
-						} else {
-							float iHalf = i / 2f;
-							end.x = origX - Mathf.CeilToInt (iHalf);
-						}
-					} else {
-						break;
+						end.y++;
 					}
 				}
 

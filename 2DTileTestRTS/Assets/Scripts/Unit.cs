@@ -62,8 +62,8 @@ public class Unit : MonoBehaviour {
 
 		mLevel = Level.getLevel ();
 		RB = GetComponent<Rigidbody2D>();
-		groundCheck1 = transform.FindChild ("groundCheck1");
-		groundCheck2 = transform.FindChild ("groundCheck2");
+		groundCheck1 = transform.Find ("groundCheck1");
+		groundCheck2 = transform.Find ("groundCheck2");
 		mCurrentBotState = BotState.None;
 		mFramesOfJumping = 0;
 		mStuckFrames = 0;
