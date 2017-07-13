@@ -278,7 +278,8 @@ public class Unit : MonoBehaviour {
 
 			if (mFramesOfJumping > 0 &&
 			    (!grounded || (reachedX && !destOnGround) || (grounded && destOnGround))) {
-				Debug.Log (mFramesOfJumping + " : " + jumpSpeed);
+				//Useful to try and debug how high the unit can g o
+				//Debug.Log (mFramesOfJumping + " : " + jumpSpeed);
 				mInputs [(int)KeyInput.Jump] = true;
 				if (!grounded)
 					--mFramesOfJumping;
@@ -406,7 +407,8 @@ public class Unit : MonoBehaviour {
 			destination,
 			width,
 			height,
-			(short)maxJumpHeight);
+			(short)maxJumpHeight,
+			1);
 
 		if (path != null && path.Count > 1)
 		{

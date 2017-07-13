@@ -111,6 +111,8 @@ namespace Algorithms
         private int                             mNewG                   = 0;
 		
 		public Level mLevel;
+
+		private int numberOfSpaceCorrection = 5;
         #endregion
 		
         #region Constructors
@@ -226,7 +228,43 @@ namespace Algorithms
             mStop = true;
         }
 
-        public List<Vector2i> FindPath(Vector2i start, Vector2i end, int characterWidth, int characterHeight, short maxCharacterJumpHeight)
+		public Vector2i FindFirstOpenTileBelow(Vector2i start) {
+			if(start.x >= mLevel.mWidth || start.x < 0 || start.y >= mLevel.mHeight || start.y < 0) {
+				return null;
+			}
+			int y = start.y;
+			while (y - 1 > 0) {
+				if (mLevel.IsGround(start.x, y)) {
+					return new Vector2i (start.x, y);
+				}
+				else {
+					y--;
+				}
+			}
+			return null;
+		}
+
+		public Vector2i FindAlternativeEndPoint (Vector2i start, Vector2i end) {
+			if (start.y > end.y) {
+				end.y = end.y + numberOfSpaceCorrection;
+			} else if (start.y < end.y) {
+				end.y = end.y - numberOfSpaceCorrection;
+			}
+
+			if (start.x > end.x) {
+				end.x = end.x + numberOfSpaceCorrection;
+			} else if (start.x < end.x) {
+				end.x = end.x -  numberOfSpaceCorrection;
+			}
+
+			if (end.x < 0 || end.y < 0 || end.x >= mLevel.mWidth || end.y >= mLevel.mHeight) {
+				return null;
+			}
+
+			return end;
+		}
+
+		public List<Vector2i> FindPath(Vector2i start, Vector2i end, int characterWidth, int characterHeight, short maxCharacterJumpHeight, int numberOfTries)
         {
             lock(this)
             {
@@ -320,6 +358,7 @@ namespace Algorithms
 					}
 				}
 
+				//No actual space (I don't think it will ever hit this since it should keep checking upwards until it hits the top)
 				if (inSolidTile == true)
 					return null;
 
@@ -383,10 +422,27 @@ namespace Algorithms
                         break;
                     }
 
+					//No path found
                     if (mCloseNodeCounter > mSearchLimit)
                     {
-                        mStopped = true;
-                        return null;
+						end = FindAlternativeEndPoint (start, end);
+						if (end == null) {
+							mStopped = true;
+							return null;
+						}
+
+						end = FindFirstOpenTileBelow (end);
+						if (end == null) {
+							mStopped = true;
+							return null;
+						}
+
+						if (numberOfTries >= 50) {
+							mStopped = true;
+							return null;
+						} else {
+							return FindPath(start, end, characterWidth, characterHeight, maxCharacterJumpHeight, numberOfTries+1);
+						}
                     }
 
                     //Lets calculate each successors
@@ -619,6 +675,7 @@ namespace Algorithms
 
                     mStopped = true;
 
+					Debug.Log ("Number of Tries for successful path: " + numberOfTries);
                     return mClose;
                 }
                 mStopped = true;
@@ -654,4 +711,5 @@ namespace Algorithms
         }
         #endregion
     }
+
 }

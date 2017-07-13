@@ -6,7 +6,7 @@ using System.Collections.Generic;
 #region Vector2i
 
 [System.Serializable]
-public struct Vector2i : IEquatable<Vector2i>
+public class Vector2i : IEquatable<Vector2i>
 {
 	public int x, y;
 	
@@ -28,6 +28,10 @@ public struct Vector2i : IEquatable<Vector2i>
 
     public static bool operator ==(Vector2i v, Vector2i v2)
     {
+		if (object.ReferenceEquals(v2, null))
+		{
+			return object.ReferenceEquals(v, null);
+		}
         return (v.x == v2.x && v.y == v2.y);
     }
 
