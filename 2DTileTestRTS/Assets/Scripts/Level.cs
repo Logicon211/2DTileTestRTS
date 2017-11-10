@@ -50,8 +50,13 @@ public class Level : MonoBehaviour {
 	/// </summary>
 	static public int cTileSize = 1;
 
-	private LineRenderer lineRenderer;
+	public Texture2D selectionTexture;
 	public LayerMask playerLayerMask;
+	private LineRenderer lineRenderer;
+
+	private bool dragging = false;
+	private Vector2 dragStartPosition;
+	private Vector2 dragCurrentPosition;
 
 	void Awake() {
 		mainLevel = this;
@@ -94,8 +99,7 @@ public class Level : MonoBehaviour {
 			if (hit.collider != null) {
 				MapTile tile = hit.collider.gameObject.GetComponent<MapTile> ();
 				if (tile != null) {
-					//Instead of making an explosion. We want to save this point as the waypoint for the unit to move. Will need to figure out how to do pathfinding this way
-					//Instantiate(Resources.Load ("Explosion") as GameObject , new Vector3(hit.point.x, hit.point.y, 0), transform.rotation);
+					//Set the clicked position to one tile above the ground (over where you clicked)
 					clickPosition = new Vector2(tile.x , tile.y + 1);
 					foundClick = true;
 				}
@@ -104,27 +108,47 @@ public class Level : MonoBehaviour {
 			Vector2 player2DPosition = new Vector2 (player.transform.position.x, player.transform.position.y);
 			RaycastHit2D playerHit = Physics2D.Raycast(player2DPosition, new Vector2(0, -1), Mathf.Infinity, playerLayerMask);
 
-//			if (playerHit.collider != null) {
-//				MapTile tile = playerHit.collider.gameObject.GetComponent<MapTile> ();
-//				if (tile != null) {
-//					playerPosition = new Vector2(tile.x , tile.y + 1);
-//					foundPlayer = true;
-//				}
-//			}
-
+			//If we found the clicked area, get the start and endpoints and Move there.
 			if (foundClick/* && foundPlayer*/) {
 				Vector2i start = new Vector2i(Convert.ToInt32(playerPosition.x), Convert.ToInt32(playerPosition.y));
 				Vector2i end = new Vector2i(Convert.ToInt32(clickPosition.x), Convert.ToInt32(clickPosition.y));
-				//List<Vector2i> path = mPathFinder.FindPath (start, end, player.GetComponent<Unit>().width, player.GetComponent<Unit>().height, (short)player.GetComponent<Unit>().maxJumpHeight);
-				//DrawPathLines(path);
 				player.GetComponent<Unit>().MoveTo(end);
 			}
+		}
+
+		//Left Mouse Button Down
+		if (Input.GetMouseButtonDown (0)) {
+			dragging = true;
+			//Vector3 mouseScreenPosition = Camera.main.ScreenToWorldPoint(new Vector3 (Input.mousePosition.x, Input.mousePosition.y, 0));
+			//dragStartPosition = new Vector2(mouseScreenPosition.x, mouseScreenPosition.y);
+			dragStartPosition = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+			dragCurrentPosition = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+		}
+
+		if (Input.GetMouseButton (0)) {
+			dragCurrentPosition = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+		}
+
+		if (Input.GetMouseButtonUp (0)) {
+			dragging = false;
 		}
 	}
 
 	void FixedUpdate() {
 		//PATHFINDER STUFF
 		//player.BotUpdate();
+	}
+
+	void OnGUI()
+	{
+		if(dragging)
+		{
+			// Create a rectangle object out of the start and end position while transforming it
+			// to the screen's cordinates.
+			var rect = new Rect(dragStartPosition.x, Screen.height - dragStartPosition.y ,dragCurrentPosition.x - dragStartPosition.x, -1 * (dragCurrentPosition.y - dragStartPosition.y));
+			// Draw the texture.
+			GUI.DrawTexture(rect, selectionTexture);
+		}
 	}
 
 	//Singleton implementation, Should probably check if this is how you do it in Unity
@@ -200,39 +224,9 @@ public class Level : MonoBehaviour {
 				}
 
 				refreshCollidersOnOuterTiles ();
-
+				//An alternative method to generate 1 collider over the entire map is unfinished in the UnfinishedFunctions.txt
 				//This method generates 1 collider over the entire map
-//				gameObject.AddComponent<PolygonCollider2D>(); //collider for itself
-//				PolygonCollider2D collider = gameObject.GetComponent<PolygonCollider2D>();
-//
-//				List<Vector2> path = new List<Vector2> ();
-//				//Make collider?
-//				//simple solution to draw a collider around the first block we encounter. Will need to handle breaks and more complete maps
-//				int x = 0;
-//				int y = 0;
-//				for (x = 0; x < mapTiles.GetLength (0); x++) {
-//					bool breakLoop = false;
-//					for (y = 0; y < mapTiles.GetLength (1); y++) {
-//						if(mapTiles[x,y] != null) {
-//							breakLoop = true;
-//							break;
-//							//we should have coordinates of first tile hit
-//						}
-//						//	path.Add (node);
-//						//	Vector2 node = new Vector2(x,-y);
-//					}
-//					if (breakLoop) {
-//						break;
-//					}
-//				}
-//				Vector2 startingNode = new Vector2 (x, -y);
-//				path.Add(startingNode);
-//				path = BuildPath(path, startingNode, x, y, Direction.Up);
-//				collider.SetPath(0, path.ToArray());
-//
-				//This example sets up 2 paths, 2 boxes
-//				collider.SetPath(0, path.ToArray());
-//				collider.SetPath(1, path2.ToArray());
+
 			}
 		}
 	}
@@ -247,109 +241,6 @@ public class Level : MonoBehaviour {
 			}
 		}
 	}
-
-	//THIS FUNCTION WAS A TEST. CURRENTLY WON'T WORK AT THE MOMENT DUE TO IT EXPECTING THE MAPTILE ARRAY TO BE GAMEOBJECTS
-	public List<Vector2> BuildPath(List<Vector2> path, Vector2 startPoint, int x, int y, Direction direction) {
-		//Assuming the coordinates passed into this function equates to a non-null map tile
-		//Will try to traverse the tiles clockwise (up - right - down - left)
-
-		//currently putting path nodes for a polygon collider on the center of each node
-		//Next will just try enabling collision boxes on just the edges
-		//Also need to be able to put edges around multiple blocks of tiles, and on the inner empty spaces
-
-		bool tileUp = mapTiles[x, y].CheckTileUp ();
-		bool tileRight = mapTiles[x, y].CheckTileRight ();
-		bool tileDown = mapTiles[x, y].CheckTileDown ();
-		bool tileLeft = mapTiles[x, y].CheckTileLeft();
-
-		if (startPoint.Equals (new Vector2 (x, -y)) && path.Count > 1) {
-			//We're back to the beginning, return the path
-			return path;
-		}
-		if (direction == Direction.Up) {
-			if (tileLeft) {
-				//If the tile to the left
-				AddNodeToPath(path, x - 1, -y);
-				path = BuildPath (path, startPoint, x - 1, y, Direction.Left);
-			} else if (tileUp) {
-				//If there's a tile above us 
-				AddNodeToPath(path, x, -(y - 1));
-				path = BuildPath (path, startPoint, x, y - 1, Direction.Up);
-			} else if (tileRight) {
-				//if there's a tile to the right
-				AddNodeToPath(path, x + 1, -y);
-				path = BuildPath (path, startPoint, x + 1, y, Direction.Right);
-			} else if (tileDown) {
-				//If there's a tile below us
-				AddNodeToPath(path, x, -(y + 1));
-				path = BuildPath (path, startPoint, x, y+1, Direction.Down);
-			}
-		} else if (direction == Direction.Right) {
-			if (tileUp) {
-				//If there's a tile above us
-				AddNodeToPath(path, x, -(y - 1));
-				path = BuildPath (path, startPoint, x, y - 1, Direction.Up);
-			} else if (tileRight) {
-				//if there's a tile to the right
-				AddNodeToPath(path, x + 1, -y);
-				path = BuildPath (path, startPoint, x + 1, y, Direction.Right);
-			} else if (tileDown) {
-				//If there's a tile below us
-				AddNodeToPath(path, x, -(y + 1));
-				path = BuildPath (path, startPoint, x, y+1, Direction.Down);
-			} else if (tileLeft) {
-				//If the tile to the left
-				AddNodeToPath(path, x - 1, -y);
-				path = BuildPath (path, startPoint, x - 1, y, Direction.Left);
-			}
-		} else if (direction == Direction.Down) {
-			if (tileRight) {
-				//if there's a tile to the right
-				AddNodeToPath(path, x + 1, -y);
-				path = BuildPath (path, startPoint, x + 1, y, Direction.Right);
-			} else if (tileDown) {
-				//If there's a tile below us
-				AddNodeToPath(path, x, -(y + 1));
-				path = BuildPath (path, startPoint, x, y+1, Direction.Down);
-			} else if (tileLeft) {
-				//If the tile to the left
-				AddNodeToPath(path, x - 1, -y);
-				path = BuildPath (path, startPoint, x - 1, y, Direction.Left);
-			} else if (tileUp) {
-				//If there's a tile above us
-				AddNodeToPath(path, x, -(y - 1));
-				path = BuildPath (path, startPoint, x, y - 1, Direction.Up);
-			}
-		} else if (direction == Direction.Left) {
-			if (tileDown) {
-				//If there's a tile below us
-				AddNodeToPath(path, x, -(y + 1));
-				path = BuildPath (path, startPoint, x, y+1, Direction.Down);
-			} else if (tileLeft) {
-				//If the tile to the left
-				AddNodeToPath(path, x - 1, -y);
-				path = BuildPath (path, startPoint, x - 1, y, Direction.Left);
-			} else if (tileUp) {
-				//If there's a tile above us
-				AddNodeToPath(path, x, -(y - 1));
-				path = BuildPath (path, startPoint, x, y - 1, Direction.Up);
-			} else if (tileRight) {
-				//if there's a tile to the right
-				AddNodeToPath(path, x + 1, -y);
-				path = BuildPath (path, startPoint, x + 1, y, Direction.Right);
-			}
-		} 
-
-		//Should never really end here;
-		return path;
-	}
-
-	private void AddNodeToPath(List<Vector2> path, int x, int y) {
-		Vector2 node = new Vector2 (x, y);
-		path.Add (node);
-	}
-
-
 
 	/******************************** PATHFINDER CODE MAY NEED TO MOVE ********************************************/
 
@@ -545,246 +436,4 @@ public class Level : MonoBehaviour {
 			lineRenderer.enabled = false;
 		}
 	}
-
-//	public void SetTile(int x, int y, TileType type)
-//	{
-//		if (x <= 1 || x >= mWidth - 2 || y <= 1 || y >= mHeight - 2)
-//			return;
-//
-//		tiles[x, y] = type;
-//
-//		if (type == TileType.Block)
-//		{
-//			mGrid[x, y] = 0;
-//			AutoTile(type, x, y, 1, 8, 4, 4, 4, 4);
-//			tilesSprites[x, y].enabled = true;
-//		}
-//		else if (type == TileType.OneWay)
-//		{
-//			mGrid[x, y] = 1;
-//			tilesSprites[x, y].enabled = true;
-//
-//			tilesSprites[x, y].transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-//			tilesSprites[x, y].transform.eulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
-//			tilesSprites[x, y].sprite = mDirtSprites[25];
-//		}
-//		else
-//		{
-//			mGrid[x, y] = 1;
-//			tilesSprites[x, y].enabled = false;
-//		}
-//
-//		AutoTile(type, x - 1, y, 1, 8, 4, 4, 4, 4);
-//		AutoTile(type, x + 1, y, 1, 8, 4, 4, 4, 4);
-//		AutoTile(type, x, y - 1, 1, 8, 4, 4, 4, 4);
-//		AutoTile(type, x, y + 1, 1, 8, 4, 4, 4, 4);
-//	}
-
-	/*public void Start()
-	{
-		mRandomNumber = new System.Random();
-
-		Application.targetFrameRate = 60;
-
-		inputs = new bool[(int)KeyInput.Count];
-		prevInputs = new bool[(int)KeyInput.Count];
-
-		//set the position
-		position = transform.position;
-
-		mWidth = mapRoom.width;
-		mHeight = mapRoom.height;
-
-		tiles = new TileType[mWidth, mHeight];
-		tilesSprites = new SpriteRenderer[mapRoom.width, mapRoom.height];
-
-		mGrid = new byte[Mathf.NextPowerOfTwo((int)mWidth), Mathf.NextPowerOfTwo((int)mHeight)];
-		InitPathFinder();
-
-		Camera.main.orthographicSize = Camera.main.pixelHeight / 2;
-
-		for (int y = 0; y < mHeight; ++y)
-		{
-			for (int x = 0; x < mWidth; ++x)
-			{
-				tilesSprites[x, y] = Instantiate<SpriteRenderer>(tilePrefab);
-				tilesSprites[x, y].transform.parent = transform;
-				tilesSprites[x, y].transform.position = position + new Vector3(cTileSize * x, cTileSize * y, 10.0f);
-
-				SetTile(x, y, mapRoom.tileData[y * mWidth + x] == TileType.Empty ? TileType.Empty : TileType.Block);
-			}
-		}
-
-		for (int y = 0; y < mHeight; ++y)
-		{
-			tiles[1, y] = TileType.Block;
-			tiles[mWidth - 2, y] = TileType.Block;
-		}
-
-		for (int x = 0; x < mWidth; ++x)
-		{
-			tiles[x, 1] = TileType.Block;
-			tiles[x, mHeight - 2] = TileType.Block;
-		}
-
-		/*for (int y = 2; y < mHeight - 2; ++y)
-        {
-            for (int x = 2; x < mWidth - 2; ++x)
-            {
-                if (y < mHeight/4)
-                    SetTile(x, y, TileType.Block);
-            }
-        }*/
-
-		/*player.BotInit(inputs, prevInputs);
-		player.mMap = this;
-		player.mPosition = new Vector2(2 * Map.cTileSize, (mHeight / 2) * Map.cTileSize + player.mAABB.HalfSizeY);
-	}*/
-
-//	void Update()
-//	{
-//		inputs[(int)KeyInput.GoRight] = Input.GetKey(goRightKey);
-//		inputs[(int)KeyInput.GoLeft] = Input.GetKey(goLeftKey);
-//		inputs[(int)KeyInput.GoDown] = Input.GetKey(goDownKey);
-//		inputs[(int)KeyInput.Jump] = Input.GetKey(goJumpKey);
-//
-//		if (Input.GetKeyUp(KeyCode.Math))
-//			lastMouseTileX = lastMouseTileY = -1;
-//
-//		Vector2 mousePos = Input.mousePosition;
-//		Vector2 cameraPos = Camera.main.transform.position;
-//		var mousePosInWorld = cameraPos + mousePos - new Vector2(gameCamera.pixelWidth / 2, gameCamera.pixelHeight / 2);
-//
-//		int mouseTileX, mouseTileY;
-//		GetMapTileAtPoint(mousePosInWorld, out mouseTileX, out mouseTileY);
-//
-//		if (Input.GetKeyDown(KeyCode.Math))
-//		{
-//			player.TappedOnTile(new Vector2i(mouseTileX, mouseTileY));
-//		}
-//
-//		if (Input.GetKey(KeyCode.Mouse1) || Input.GetKey(KeyCode.Mouse2))
-//		{
-//			if (mouseTileX != lastMouseTileX || mouseTileY != lastMouseTileY || Input.GetKeyDown(KeyCode.Mouse1) || Input.GetKeyDown(KeyCode.Mouse2))
-//			{
-//				if (!IsNotEmpty(mouseTileX, mouseTileY))
-//					SetTile(mouseTileX, mouseTileY, TileType.Block );
-//				else
-//					SetTile(mouseTileX, mouseTileY, TileType.Empty);
-//
-//				lastMouseTileX = mouseTileX;
-//				lastMouseTileY = mouseTileY;
-//			}
-//		}
-//	}
-
-//	System.Random mRandomNumber;
-//
-//	void AutoTile(TileType type, int x, int y, int rand4NeighbourTiles, int rand3NeighbourTiles,
-//		int rand2NeighbourPipeTiles, int rand2NeighbourCornerTiles, int rand1NeighbourTiles, int rand0NeighbourTiles)
-//	{
-//		if (x >= mWidth || x < 0 || y >= mHeight || y < 0)
-//			return;
-//
-//		if (tiles[x, y] != TileType.Block)
-//			return;
-//
-//		int tileOnLeft = tiles[x - 1, y] == tiles[x, y] ? 1 : 0;
-//		int tileOnRight = tiles[x + 1, y] == tiles[x, y] ? 1 : 0;
-//		int tileOnTop = tiles[x, y + 1] == tiles[x, y] ? 1 : 0;
-//		int tileOnBottom = tiles[x, y - 1] == tiles[x, y] ? 1 : 0;
-//
-//		float scaleX = 1.0f;
-//		float scaleY = 1.0f;
-//		float rot = 0.0f;
-//		int id = 0;
-//
-//		int sum = tileOnLeft + tileOnRight + tileOnTop + tileOnBottom;
-//
-//		switch (sum)
-//		{
-//		case 0:
-//			id = 1 + mRandomNumber.Next(rand0NeighbourTiles);
-//
-//			break;
-//		case 1:
-//			id = 1 + rand0NeighbourTiles + mRandomNumber.Next(rand1NeighbourTiles);
-//
-//			if (tileOnRight == 1)
-//				scaleX = -1;
-//			else if (tileOnTop == 1)
-//				rot = -1;
-//			else if (tileOnBottom == 1)
-//			{
-//				rot = 1;
-//				scaleY = -1;
-//			}
-//
-//			break;
-//		case 2:
-//
-//			if (tileOnLeft + tileOnBottom == 2)
-//			{
-//				id = 1 + rand0NeighbourTiles + rand1NeighbourTiles + rand2NeighbourPipeTiles
-//					+ mRandomNumber.Next(rand2NeighbourCornerTiles);
-//			}
-//			else if (tileOnRight + tileOnBottom == 2)
-//			{
-//				id = 1 + rand0NeighbourTiles + rand1NeighbourTiles + rand2NeighbourPipeTiles
-//					+ mRandomNumber.Next(rand2NeighbourCornerTiles);
-//				scaleX = -1;
-//			}
-//			else if (tileOnTop + tileOnLeft == 2)
-//			{
-//				id = 1 + rand0NeighbourTiles + rand1NeighbourTiles + rand2NeighbourPipeTiles
-//					+ mRandomNumber.Next(rand2NeighbourCornerTiles);
-//				scaleY = -1;
-//			}
-//			else if (tileOnTop + tileOnRight == 2)
-//			{
-//				id = 1 + rand0NeighbourTiles + rand1NeighbourTiles + rand2NeighbourPipeTiles
-//					+ mRandomNumber.Next(rand2NeighbourCornerTiles);
-//				scaleX = -1;
-//				scaleY = -1;
-//			}
-//			else if (tileOnTop + tileOnBottom == 2)
-//			{
-//				id = 1 + rand0NeighbourTiles + rand1NeighbourTiles + mRandomNumber.Next(rand2NeighbourPipeTiles);
-//				rot = 1;
-//			}
-//			else if (tileOnRight + tileOnLeft == 2)
-//				id = 1 + rand0NeighbourTiles + rand1NeighbourTiles + mRandomNumber.Next(rand2NeighbourPipeTiles);
-//
-//			break;
-//		case 3:
-//			id = 1 + rand0NeighbourTiles + rand1NeighbourTiles + rand2NeighbourPipeTiles
-//				+ rand2NeighbourCornerTiles + mRandomNumber.Next(rand3NeighbourTiles);
-//
-//			if (tileOnLeft == 0)
-//			{
-//				rot = 1;
-//				scaleX = -1;
-//			}
-//			else if (tileOnRight == 0)
-//			{
-//				rot = 1;
-//				scaleY = -1;
-//			}
-//			else if (tileOnBottom == 0)
-//				scaleY = -1;
-//
-//			break;
-//
-//		case 4:
-//			id = 1 + rand0NeighbourTiles + rand1NeighbourTiles + rand2NeighbourPipeTiles
-//				+ rand2NeighbourCornerTiles + rand3NeighbourTiles + mRandomNumber.Next(rand4NeighbourTiles);
-//
-//			break;
-//		}
-//
-//		tilesSprites[x, y].transform.localScale = new Vector3(scaleX, scaleY, 1.0f);
-//		tilesSprites[x, y].transform.eulerAngles = new Vector3(0.0f, 0.0f, rot * 90.0f);
-//		tilesSprites[x, y].sprite = mDirtSprites[id - 1];
-//	}
-
 }

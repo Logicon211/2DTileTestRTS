@@ -675,7 +675,7 @@ namespace Algorithms
 
                     mStopped = true;
 
-					Debug.Log ("Number of Tries for successful path: " + numberOfTries);
+					//Debug.Log ("Number of Tries for successful path: " + numberOfTries);
                     return mClose;
                 }
                 mStopped = true;
