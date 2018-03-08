@@ -303,7 +303,8 @@ public class Level : MonoBehaviour {
 	{
 		mPathFinder = new PathFinderFast(this);
 
-		mPathFinder.Formula                 = HeuristicFormula.Manhattan;
+		//EuclideanNoSQR seemed to work the best, although it sometimes provides a little hop off ledges that is unneeded
+		mPathFinder.Formula                 = HeuristicFormula.EuclideanNoSQR;
 		//if false then diagonal movement will be prohibited
 		mPathFinder.Diagonals               = false;
 		//if true then diagonal movement will have higher cost

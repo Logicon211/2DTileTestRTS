@@ -112,7 +112,11 @@ namespace Algorithms
 		
 		public Level mLevel;
 
+		//Reduces the distance by *numberOfSpaceCorrection* when trying to find a path when the original endpoint is unreachable
 		private int numberOfSpaceCorrection = 5;
+
+		//Devides the distance by *numberOfSpaceCorrectionRatio* when trying to find a path when the original endpoint is unreachable
+		private int numberOfSpaceCorrectionRatio = 2;
         #endregion
 		
         #region Constructors
@@ -245,16 +249,22 @@ namespace Algorithms
 		}
 
 		public Vector2i FindAlternativeEndPoint (Vector2i start, Vector2i end) {
+			int yDistance = Math.Abs (start.y - end.y);
+			int xDistance = Math.Abs (start.x - end.x);
+
+			int yCorrection = Mathf.CeilToInt (yDistance / numberOfSpaceCorrectionRatio);
+			int xCorrection = Mathf.CeilToInt (xDistance / numberOfSpaceCorrectionRatio);
+
 			if (start.y > end.y) {
-				end.y = end.y + numberOfSpaceCorrection;
+				end.y = end.y + yCorrection;
 			} else if (start.y < end.y) {
-				end.y = end.y - numberOfSpaceCorrection;
+				end.y = end.y - yCorrection;
 			}
 
 			if (start.x > end.x) {
-				end.x = end.x + numberOfSpaceCorrection;
+				end.x = end.x + xCorrection;
 			} else if (start.x < end.x) {
-				end.x = end.x -  numberOfSpaceCorrection;
+				end.x = end.x -  xCorrection;
 			}
 
 			if (end.x < 0 || end.y < 0 || end.x >= mLevel.mWidth || end.y >= mLevel.mHeight) {
@@ -552,7 +562,7 @@ namespace Algorithms
 						if (jumpLength >= 0 && jumpLength % 2 != 0 && mLocationX != mNewLocationX)
 							continue;
 						
-						//if we're falling and succeor's height is bigger than ours, skip that successor
+						//if we're falling and successor's height is bigger than ours, skip that successor
 						if (jumpLength >= maxCharacterJumpHeight * 2 && mNewLocationY > mLocationY)
 							continue;
 
@@ -562,6 +572,7 @@ namespace Algorithms
 
 						//The commented out part here would normally be "1" for empty space, but in this case it would be checking a null object so we'll go with this for now
 						//If Jumping is too prevalent (Or not enough) change the amount we divide the newJumpLength by here. 4 is the default from the algorithm but it sometimes makes the path pretty jumpy
+						//**NOTE** I changed the newJumpLength Division value to 2, it seemed to fix the issue where jumping all the time was the best path.
                         mNewG = nodes[mLocation.xy][mLocation.z].G + /*mGrid[mNewLocationX, mNewLocationY]*/1 + newJumpLength / 4;
 
                         if (nodes[mNewLocation].Count > 0)
