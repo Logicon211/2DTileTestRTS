@@ -249,7 +249,6 @@ namespace Algorithms
 		}
 
 		public Vector2i FindAlternativeEndPoint (Vector2i start, Vector2i end) {
-			Debug.Log("Finding new end point - " + end);
 			int yDistance = Math.Abs (start.y - end.y);
 			int xDistance = Math.Abs (start.x - end.x);
 
@@ -271,8 +270,6 @@ namespace Algorithms
 			if (end.x < 0 || end.y < 0 || end.x >= mLevel.mWidth || end.y >= mLevel.mHeight) {
 				return null;
 			}
-
-			Debug.Log ("Try end point - " + end);
 
 			return end;
 		}
