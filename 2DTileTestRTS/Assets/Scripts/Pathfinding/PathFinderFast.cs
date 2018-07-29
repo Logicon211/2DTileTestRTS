@@ -249,6 +249,7 @@ namespace Algorithms
 		}
 
 		public Vector2i FindAlternativeEndPoint (Vector2i start, Vector2i end) {
+			Debug.Log("Finding new end point - " + end);
 			int yDistance = Math.Abs (start.y - end.y);
 			int xDistance = Math.Abs (start.x - end.x);
 
@@ -270,6 +271,8 @@ namespace Algorithms
 			if (end.x < 0 || end.y < 0 || end.x >= mLevel.mWidth || end.y >= mLevel.mHeight) {
 				return null;
 			}
+
+			Debug.Log ("Try end point - " + end);
 
 			return end;
 		}
@@ -690,7 +693,9 @@ namespace Algorithms
                     return mClose;
                 }
                 mStopped = true;
-                return null;
+				//TODO: Verify that finding an alternate end point path is the most efficient thing to do here. Seems like it could be slow
+				return FindPath(start, FindAlternativeEndPoint(start, end), characterWidth, characterHeight, maxCharacterJumpHeight, numberOfTries+1);
+				//return null
             }
         }
         #endregion
