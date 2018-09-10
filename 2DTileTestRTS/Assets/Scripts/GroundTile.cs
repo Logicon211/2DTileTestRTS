@@ -13,7 +13,4 @@ public class GroundTile : MapTile {
 		base.Update ();
 	}
 
-	public override void TestInheritance() {
-		int i = 0;
-	}
 }

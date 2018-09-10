@@ -31,9 +31,6 @@ public class MapTile : MonoBehaviour {
 
 	}
 
-	public virtual void TestInheritance() {
-		int i = 0;
-	}
 
 	public void Instantiate(int x, int y, Transform parent, Level level) {
 		this.x = x;

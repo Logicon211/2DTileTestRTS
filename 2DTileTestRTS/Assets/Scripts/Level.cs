@@ -5,6 +5,7 @@ using System.Xml;
 using System.Linq;
 using System;
 using Algorithms;
+using UnityEngine.Tilemaps;
 
 [System.Serializable]
 public enum TileType
@@ -19,6 +20,9 @@ public class Level : MonoBehaviour {
 	public TextAsset levelXml;
 	public bool loadAtStartUp = true;
 	public MapTile[,] mapTiles;
+
+	public Tilemap tileMap;
+	public Grid tileMapGrid;
 
 	public GameObject groundTilePrefab;
 
@@ -173,6 +177,33 @@ public class Level : MonoBehaviour {
 	}
 
 	public void InstantiateLevel() {
+
+		//Will shorten tilemap so any extra space is removed:
+		tileMap.CompressBounds();
+
+		BoundsInt bounds = tileMap.cellBounds;
+        TileBase[] allTiles = tileMap.GetTilesBlock(bounds);
+
+		Vector3 size = bounds.size;
+
+		int xPowerOfTwo = CeilToNextPowerOfTwo(bounds.size.x);
+		int yPowerOfTwo = CeilToNextPowerOfTwo(bounds.size.y);
+
+        for (int x = 0; x < bounds.size.x; x++) {
+            for (int y = 0; y < bounds.size.y; y++) {
+                RuleTile tile = (RuleTile)allTiles[x + y * bounds.size.x];
+				GameObject tileObject = tile.m_DefaultGameObject;
+                if (tile != null) {
+                    Debug.Log("x:" + x + " y:" + y + " tile:" + tile.name);
+                } else {
+                    Debug.Log("x:" + x + " y:" + y + " tile: (null)");
+                }
+            }
+        }  
+
+		//TODO: take tileObjects and put them into the mapTiles array below (instead of loading it via XML)
+		//TODO: Figure out if the TileMap's position in the world messes with pathfinding. It may need to be moved to (0,0,0) in order to determine the correct location of each tile
+
 		XmlDocument xmlDoc = new XmlDocument(); // xmlDoc is the new xml document.
 		xmlDoc.LoadXml(levelXml.text);
 		XmlNode levelNode = xmlDoc.FirstChild;
@@ -229,6 +260,22 @@ public class Level : MonoBehaviour {
 
 			}
 		}
+	}
+
+	public  int CeilToNextPowerOfTwo(int number) {
+		int a = number;
+		int powOfTwo = 1;
+
+		while (a > 1)
+		{
+			a = a >> 1;
+			powOfTwo = powOfTwo << 1;
+		}
+		if (powOfTwo != number)
+		{
+			powOfTwo = powOfTwo << 1;
+		}
+		return powOfTwo;
 	}
 
 	public void refreshCollidersOnOuterTiles() {
