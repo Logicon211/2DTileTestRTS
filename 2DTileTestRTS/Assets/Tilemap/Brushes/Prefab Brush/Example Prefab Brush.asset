@@ -3,7 +3,7 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Name: Example Prefab Brush
   m_EditorClassIdentifier: 
   m_Prefabs:
-  - {fileID: 1684250505934714, guid: d2937ee06f85133438a634d363dc8fc3, type: 2}
-  - {fileID: 1873747389051474, guid: d76c73c52ab40e24e82880abeffca7ca, type: 2}
+  - {fileID: 1000010086179936, guid: aaca2b07109d0934c9b1c7dbe756e935, type: 2}
   m_PerlinScale: 0.191
   m_Z: 0

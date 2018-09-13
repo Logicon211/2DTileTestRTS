@@ -186,80 +186,104 @@ public class Level : MonoBehaviour {
 
 		Vector3 size = bounds.size;
 
-		int xPowerOfTwo = CeilToNextPowerOfTwo(bounds.size.x);
-		int yPowerOfTwo = CeilToNextPowerOfTwo(bounds.size.y);
+		int xSizePowerOfTwo = CeilToNextPowerOfTwo(bounds.size.x);
+		int ySizePowerOfTwo = CeilToNextPowerOfTwo(bounds.size.y);
 
-        for (int x = 0; x < bounds.size.x; x++) {
-            for (int y = 0; y < bounds.size.y; y++) {
-                RuleTile tile = (RuleTile)allTiles[x + y * bounds.size.x];
+		mWidth = xSizePowerOfTwo;
+		//double map height so we have some extra space
+		mHeight = ySizePowerOfTwo*2;
+		mapTiles = new MapTile[mWidth,mHeight];
+
+		//TODO: Figure out how to place map tiles in the array via the position of itself in the TileMap Grid. Right now the grid support negative x and y position
+		//The first element in the array might be the top leftmost element, which means I might be able to offset the grid by it's index
+
+		//READ THIS https://forum.unity.com/threads/tilemap-tile-positions-assistance.485867/
+		//Might need to make a custom Tile that stores a game object that DOESN'T SPAWN by default so I can manually spawn it during this for loop (Similar to Rule Tile)
+		//m_DefaultGameObject seems to just be a pointer to the prefab and not the thing that actually spawns ()
+        for (int i = 0; i < allTiles.Length; i++) {
+			RuleTile tile = (RuleTile)allTiles[i];
+			if (tile != null) {
 				GameObject tileObject = tile.m_DefaultGameObject;
-                if (tile != null) {
-                    Debug.Log("x:" + x + " y:" + y + " tile:" + tile.name);
-                } else {
-                    Debug.Log("x:" + x + " y:" + y + " tile: (null)");
-                }
-            }
+				Vector3Int mapTilePosition = tileMapGrid.WorldToCell(tileObject.transform.position);
+				int test = 2;
+				//mapTiles [mapTilePosition.x,mapTilePosition.y+ySizePowerOfTwo] = tileObject.GetComponent<MapTile>();
+			}
+
+
+            // for (int y = 0; y < bounds.size.y; y++) {
+            //     RuleTile tile = (RuleTile)allTiles[x + y * bounds.size.x];
+			// 	tile.GetTileData()
+            //     if (tile != null) {
+			// 		GameObject tileObject = tile.m_DefaultGameObject;
+			// 		//the y index needs to be pushed down half the map so the top half is extra space (for pathfinding purposes)
+			// 		mapTiles [x,y+ySizePowerOfTwo] = tileObject.GetComponent<MapTile>();
+            //         Debug.Log("x:" + x + " y:" + y + " tile:" + tile.name);
+            //     } else {
+            //         Debug.Log("x:" + x + " y:" + y + " tile: (null)");
+            //     }
+            // }
         }  
 
 		//TODO: take tileObjects and put them into the mapTiles array below (instead of loading it via XML)
 		//TODO: Figure out if the TileMap's position in the world messes with pathfinding. It may need to be moved to (0,0,0) in order to determine the correct location of each tile
 
-		XmlDocument xmlDoc = new XmlDocument(); // xmlDoc is the new xml document.
-		xmlDoc.LoadXml(levelXml.text);
-		XmlNode levelNode = xmlDoc.FirstChild;
-		XmlNodeList levelsList = xmlDoc.GetElementsByTagName("level"); // array of the level nodes.
+		// XmlDocument xmlDoc = new XmlDocument(); // xmlDoc is the new xml document.
+		// xmlDoc.LoadXml(levelXml.text);
+		// XmlNode levelNode = xmlDoc.FirstChild;
+		// XmlNodeList levelsList = xmlDoc.GetElementsByTagName("level"); // array of the level nodes.
 
-		mWidth = int.Parse(levelNode.Attributes ["width"].Value);
-		mHeight = int.Parse(levelNode.Attributes ["height"].Value);
-		mapTiles = new MapTile[mWidth,mHeight];
-		foreach(XmlNode levelInfo in levelsList) {
-			XmlNodeList levelContent = levelInfo.ChildNodes;
+		// mWidth = int.Parse(levelNode.Attributes ["width"].Value);
+		// mHeight = int.Parse(levelNode.Attributes ["height"].Value);
+		// mapTiles = new MapTile[mWidth,mHeight];
+		// foreach(XmlNode levelInfo in levelsList) {
+		// 	XmlNodeList levelContent = levelInfo.ChildNodes;
 			
-			foreach(XmlNode levelItems in levelContent) {
-				if(levelItems.Name == "Tiles") {
-					//get Attribuites for level
-					string tilesetName = levelItems.Attributes["tileset"].Value;
+		// 	foreach(XmlNode levelItems in levelContent) {
+		// 		if(levelItems.Name == "Tiles") {
+		// 			//get Attribuites for level
+		// 			string tilesetName = levelItems.Attributes["tileset"].Value;
 					
-					foreach (XmlNode levelTile in levelItems.ChildNodes) {
-						if(levelTile.Name == "tile") {
+		// 			foreach (XmlNode levelTile in levelItems.ChildNodes) {
+		// 				if(levelTile.Name == "tile") {
 							
-							int tileX = int.Parse(levelTile.Attributes["x"].Value);
-							//-y values because OGMO's axis starts in the upper left and not lower left.
-							int tileY = mHeight - int.Parse(levelTile.Attributes["y"].Value);
-							int id = int.Parse(levelTile.Attributes["id"].Value);
+		// 					int tileX = int.Parse(levelTile.Attributes["x"].Value);
+		// 					//-y values because OGMO's axis starts in the upper left and not lower left.
+		// 					int tileY = mHeight - int.Parse(levelTile.Attributes["y"].Value);
+		// 					int id = int.Parse(levelTile.Attributes["id"].Value);
 
 
-							//convert these to cases?
-							//More possible tiles
-							//Note, in order to use Resources.load, the prefab needs to be in the Resources folder
-							MapTile tile = null;
+		// 					//convert these to cases?
+		// 					//More possible tiles
+		// 					//Note, in order to use Resources.load, the prefab needs to be in the Resources folder
+		// 					MapTile tile = null;
 
 
-							//Ground Tile
-							if (id == 0) {
-								tile = (Instantiate(groundTilePrefab, new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation) as GameObject).GetComponent<MapTile> ();
-								tile.Instantiate (tileX, tileY, transform, this);
-							} 
-							//More tiles to check for in here
+		// 					//Ground Tile
+		// 					if (id == 0) {
+		// 						tile = (Instantiate(groundTilePrefab, new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation) as GameObject).GetComponent<MapTile> ();
+		// 						tile.Instantiate (tileX, tileY, transform, this);
+		// 					} 
+		// 					//More tiles to check for in here
 
-							mapTiles [tileX,tileY] = tile;	
-						}
-					}
-				}
+		// 					mapTiles [tileX,tileY] = tile;	
+		// 				}
+		// 			}
+		// 		}
 				
-				if(levelItems.Name == "Entities") {
-					foreach(XmlNode levelEntities in levelItems) {
-						//Do something with entities
-						//obj.Add ("entities", levelEntities.InnerXml);
-					}
-				}
+		// 		if(levelItems.Name == "Entities") {
+		// 			foreach(XmlNode levelEntities in levelItems) {
+		// 				//Do something with entities
+		// 				//obj.Add ("entities", levelEntities.InnerXml);
+		// 			}
+		// 		}
 
-				refreshCollidersOnOuterTiles ();
-				//An alternative method to generate 1 collider over the entire map is unfinished in the UnfinishedFunctions.txt
-				//This method generates 1 collider over the entire map
+		// 		//refreshCollidersOnOuterTiles ();
+		// 		//An alternative method to generate 1 collider over the entire map is unfinished in the UnfinishedFunctions.txt
+		// 		//This method generates 1 collider over the entire map
 
-			}
-		}
+		// 	}
+		// }
+		refreshCollidersOnOuterTiles();
 	}
 
 	public  int CeilToNextPowerOfTwo(int number) {
@@ -284,6 +308,8 @@ public class Level : MonoBehaviour {
 				if(mapTiles[x,y] != null && mapTiles[x, y].IsOuterTile()) {
 					//Enable Collider
 					mapTiles [x, y].gameObject.GetComponent<BoxCollider2D> ().enabled = true;
+				} else if (mapTiles[x,y] != null) {
+					mapTiles [x, y].gameObject.GetComponent<BoxCollider2D> ().enabled = false;
 				}
 			}
 		}

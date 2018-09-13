@@ -12,6 +12,18 @@ MonoBehaviour:
   m_Name: Ground Tile
   m_EditorClassIdentifier: 
   m_DefaultSprite: {fileID: 0}
-  m_DefaultGameObject: {fileID: 0}
-  m_DefaultColliderType: 1
-  m_TilingRules: []
+  m_DefaultGameObject: {fileID: 1000010086179936, guid: aaca2b07109d0934c9b1c7dbe756e935,
+    type: 2}
+  m_DefaultColliderType: 0
+  m_TilingRules:
+  - m_Neighbors: 0000000000000000000000000000000000000000000000000000000000000000
+    m_Sprites:
+    - {fileID: 0}
+    m_GameObject: {fileID: 1000010086179936, guid: aaca2b07109d0934c9b1c7dbe756e935,
+      type: 2}
+    m_AnimationSpeed: 1
+    m_PerlinScale: 0.5
+    m_RuleTransform: 0
+    m_Output: 0
+    m_ColliderType: 0
+    m_RandomTransform: 0
