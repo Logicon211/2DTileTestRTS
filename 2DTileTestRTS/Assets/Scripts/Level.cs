@@ -5,6 +5,7 @@ using System.Xml;
 using System.Linq;
 using System;
 using Algorithms;
+using CreativeSpore.SuperTilemapEditor;
 
 [System.Serializable]
 public enum TileType
@@ -57,6 +58,9 @@ public class Level : MonoBehaviour {
 	private bool dragging = false;
 	private Vector2 dragStartPosition;
 	private Vector2 dragCurrentPosition;
+
+	//Tilemap editor references
+	public STETilemap tilemap;
 
 	void Awake() {
 		mainLevel = this;
@@ -173,62 +177,89 @@ public class Level : MonoBehaviour {
 	}
 
 	public void InstantiateLevel() {
-		XmlDocument xmlDoc = new XmlDocument(); // xmlDoc is the new xml document.
-		xmlDoc.LoadXml(levelXml.text);
-		XmlNode levelNode = xmlDoc.FirstChild;
-		XmlNodeList levelsList = xmlDoc.GetElementsByTagName("level"); // array of the level nodes.
 
-		mWidth = int.Parse(levelNode.Attributes ["width"].Value);
-		mHeight = int.Parse(levelNode.Attributes ["height"].Value);
+		//Tilemap MUST enforce a non-negative index grid, and size of height and width need to be a power of 2
+		//Tilemap must be at map coordinate x = -0.5, and y = -0.5 so that the offset allows the pathfinder to place nodes in the middle of tiles and not in the top left corner
+		mWidth = tilemap.GridWidth;
+		mHeight = tilemap.GridHeight;
+		Debug.Log(mWidth);
+		Debug.Log(mHeight);
 		mapTiles = new MapTile[mWidth,mHeight];
-		foreach(XmlNode levelInfo in levelsList) {
-			XmlNodeList levelContent = levelInfo.ChildNodes;
-			
-			foreach(XmlNode levelItems in levelContent) {
-				if(levelItems.Name == "Tiles") {
-					//get Attribuites for level
-					string tilesetName = levelItems.Attributes["tileset"].Value;
-					
-					foreach (XmlNode levelTile in levelItems.ChildNodes) {
-						if(levelTile.Name == "tile") {
-							
-							int tileX = int.Parse(levelTile.Attributes["x"].Value);
-							//-y values because OGMO's axis starts in the upper left and not lower left.
-							int tileY = mHeight - int.Parse(levelTile.Attributes["y"].Value);
-							int id = int.Parse(levelTile.Attributes["id"].Value);
 
-
-							//convert these to cases?
-							//More possible tiles
-							//Note, in order to use Resources.load, the prefab needs to be in the Resources folder
-							MapTile tile = null;
-
-
-							//Ground Tile
-							if (id == 0) {
-								tile = (Instantiate(groundTilePrefab, new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation) as GameObject).GetComponent<MapTile> ();
-								tile.Instantiate (tileX, tileY, transform, this);
-							} 
-							//More tiles to check for in here
-
-							mapTiles [tileX,tileY] = tile;	
-						}
+		for(int x=0; x < mWidth; x++) {
+			for(int y=0; y < mHeight; y++) {
+				//Null check?
+				GameObject tileObject = tilemap.GetTileObject(x, y);
+				if(tileObject) {
+					MapTile tile = tileObject.GetComponent<MapTile>();
+					if(tile != null) {
+						tile.Instantiate (x, y, tile.transform, this);
+						mapTiles[x, y] = tile;
 					}
 				}
-				
-				if(levelItems.Name == "Entities") {
-					foreach(XmlNode levelEntities in levelItems) {
-						//Do something with entities
-						//obj.Add ("entities", levelEntities.InnerXml);
-					}
-				}
-
-				refreshCollidersOnOuterTiles ();
-				//An alternative method to generate 1 collider over the entire map is unfinished in the UnfinishedFunctions.txt
-				//This method generates 1 collider over the entire map
-
 			}
 		}
+
+		refreshCollidersOnOuterTiles ();
+
+		//**************************************************************************************** */
+
+		// XmlDocument xmlDoc = new XmlDocument(); // xmlDoc is the new xml document.
+		// xmlDoc.LoadXml(levelXml.text);
+		// XmlNode levelNode = xmlDoc.FirstChild;
+		// XmlNodeList levelsList = xmlDoc.GetElementsByTagName("level"); // array of the level nodes.
+
+		// mWidth = int.Parse(levelNode.Attributes ["width"].Value);
+		// mHeight = int.Parse(levelNode.Attributes ["height"].Value);
+		// mapTiles = new MapTile[mWidth,mHeight];
+		// foreach(XmlNode levelInfo in levelsList) {
+		// 	XmlNodeList levelContent = levelInfo.ChildNodes;
+			
+		// 	foreach(XmlNode levelItems in levelContent) {
+		// 		if(levelItems.Name == "Tiles") {
+		// 			//get Attribuites for level
+		// 			string tilesetName = levelItems.Attributes["tileset"].Value;
+					
+		// 			foreach (XmlNode levelTile in levelItems.ChildNodes) {
+		// 				if(levelTile.Name == "tile") {
+							
+		// 					int tileX = int.Parse(levelTile.Attributes["x"].Value);
+		// 					//-y values because OGMO's axis starts in the upper left and not lower left.
+		// 					int tileY = mHeight - int.Parse(levelTile.Attributes["y"].Value);
+		// 					int id = int.Parse(levelTile.Attributes["id"].Value);
+
+
+		// 					//convert these to cases?
+		// 					//More possible tiles
+		// 					//Note, in order to use Resources.load, the prefab needs to be in the Resources folder
+		// 					MapTile tile = null;
+
+
+		// 					//Ground Tile
+		// 					if (id == 0) {
+		// 						tile = (Instantiate(groundTilePrefab, new Vector3(transform.position.x +(tileX), transform.position.y +(tileY), 0), transform.rotation) as GameObject).GetComponent<MapTile> ();
+		// 						tile.Instantiate (tileX, tileY, transform, this);
+		// 					} 
+		// 					//More tiles to check for in here
+
+		// 					mapTiles [tileX,tileY] = tile;	
+		// 				}
+		// 			}
+		// 		}
+				
+		// 		if(levelItems.Name == "Entities") {
+		// 			foreach(XmlNode levelEntities in levelItems) {
+		// 				//Do something with entities
+		// 				//obj.Add ("entities", levelEntities.InnerXml);
+		// 			}
+		// 		}
+
+		// 		refreshCollidersOnOuterTiles ();
+		// 		//An alternative method to generate 1 collider over the entire map is unfinished in the UnfinishedFunctions.txt
+		// 		//This method generates 1 collider over the entire map
+
+		// 	}
+		// }
 	}
 
 	public void refreshCollidersOnOuterTiles() {
