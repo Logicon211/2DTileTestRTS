@@ -71,7 +71,6 @@ public class Level : MonoBehaviour {
 		lineRenderer = GetComponent<LineRenderer> ();
 		if(loadAtStartUp) {
 			//Destroy all existing Children and reload
-			ClearLevel();
 			InstantiateLevel();
 		}
 
@@ -163,27 +162,12 @@ public class Level : MonoBehaviour {
 		return mainLevel;
 	}
 
-	public void ClearLevel() {
-		foreach(Transform child in transform) {
-			Destroy(child.gameObject);
-		}
-	}
-
-	public void ClearLevelFromEditor() {
-		List<Transform> tempList = transform.Cast<Transform>().ToList();
-		foreach(Transform child in tempList) {
-			DestroyImmediate(child.gameObject);
-		}
-	}
-
 	public void InstantiateLevel() {
 
 		//Tilemap MUST enforce a non-negative index grid, and size of height and width need to be a power of 2
 		//Tilemap must be at map coordinate x = -0.5, and y = -0.5 so that the offset allows the pathfinder to place nodes in the middle of tiles and not in the top left corner
 		mWidth = tilemap.GridWidth;
 		mHeight = tilemap.GridHeight;
-		Debug.Log(mWidth);
-		Debug.Log(mHeight);
 		mapTiles = new MapTile[mWidth,mHeight];
 
 		for(int x=0; x < mWidth; x++) {
@@ -191,10 +175,14 @@ public class Level : MonoBehaviour {
 				//Null check?
 				GameObject tileObject = tilemap.GetTileObject(x, y);
 				if(tileObject) {
-					MapTile tile = tileObject.GetComponent<MapTile>();
-					if(tile != null) {
+					if(tileObject.GetComponent<MapTile>() != null) {
+						MapTile tile = tileObject.GetComponent<MapTile>();
 						tile.Instantiate (x, y, tile.transform, this);
 						mapTiles[x, y] = tile;
+					} else if (tileObject.GetComponent<Building>() != null) {
+						Debug.Log("BUILDING TILE");
+						//TODO: instantiate the building in some way, maybe destroy it and recreate it at the spot?
+						//TODO: use the building's height and width to determine which map naps nodes it occupies starting from the bottom right corner of it
 					}
 				}
 			}

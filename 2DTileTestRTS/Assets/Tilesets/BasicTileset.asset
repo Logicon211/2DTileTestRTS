@@ -12,24 +12,24 @@ MonoBehaviour:
   m_Name: BasicTileset
   m_EditorClassIdentifier: 
   AtlasTexture: {fileID: 2800000, guid: bfea1675669386d44a26549bf2782267, type: 3}
-  TilePxSize: {x: 16, y: 16}
+  TilePxSize: {x: 8, y: 8}
   SliceOffset: {x: 0, y: 0}
   SlicePadding: {x: 0, y: 0}
   BackgroundColor: {r: 0.8039216, g: 0.8039216, b: 0.8039216, a: 0.8039216}
   VisualTileSize: {x: 32, y: 32}
   VisualTilePadding: 1
-  TileRowLength: 1
+  TileRowLength: 2
   m_tileViews: []
-  m_tilesetWidth: 1
-  m_tilesetHeight: 1
+  m_tilesetWidth: 2
+  m_tilesetHeight: 2
   m_brushes: []
   m_tiles:
   - uv:
       serializedVersion: 2
       x: 0
-      y: 0
-      width: 1
-      height: 1
+      y: 0.5
+      width: 0.5
+      height: 0.5
     collData:
       vertices:
       - {x: 0, y: 0}
@@ -41,6 +41,77 @@ MonoBehaviour:
       m_paramList: []
     prefabData:
       prefab: {fileID: 1000010086179936, guid: aaca2b07109d0934c9b1c7dbe756e935, type: 2}
+      offset: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0}
+      offsetMode: 0
+      showTileWithPrefab: 0
+      showPrefabPreviewInTilePalette: 0
+    autilingGroup: 0
+  - uv:
+      serializedVersion: 2
+      x: 0.5
+      y: 0.5
+      width: 0.5
+      height: 0.5
+    collData:
+      vertices: []
+      type: 0
+    paramContainer:
+      m_paramList:
+      - name: team
+        _paramType: 2
+        _boolValue: 0
+        _intValue: 1
+        _floatValue: 0
+        _stringValue: 
+        _objectValue: {fileID: 0}
+    prefabData:
+      prefab: {fileID: 1631586451658858, guid: 25c0b4e2825893e45b60f8c5026296fe, type: 2}
+      offset: {x: 4, y: 4, z: 0}
+      rotation: {x: 0, y: 0, z: 0}
+      offsetMode: 1
+      showTileWithPrefab: 1
+      showPrefabPreviewInTilePalette: 1
+    autilingGroup: 0
+  - uv:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0.5
+      height: 0.5
+    collData:
+      vertices: []
+      type: 0
+    paramContainer:
+      m_paramList:
+      - name: team
+        _paramType: 2
+        _boolValue: 0
+        _intValue: 2
+        _floatValue: 0
+        _stringValue: 
+        _objectValue: {fileID: 0}
+    prefabData:
+      prefab: {fileID: 1631586451658858, guid: 25c0b4e2825893e45b60f8c5026296fe, type: 2}
+      offset: {x: 4, y: 4, z: 0}
+      rotation: {x: 0, y: 0, z: 0}
+      offsetMode: 1
+      showTileWithPrefab: 1
+      showPrefabPreviewInTilePalette: 1
+    autilingGroup: 0
+  - uv:
+      serializedVersion: 2
+      x: 0.5
+      y: 0
+      width: 0.5
+      height: 0.5
+    collData:
+      vertices: []
+      type: 0
+    paramContainer:
+      m_paramList: []
+    prefabData:
+      prefab: {fileID: 0}
       offset: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0}
       offsetMode: 0

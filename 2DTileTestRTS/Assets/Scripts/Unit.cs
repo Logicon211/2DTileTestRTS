@@ -13,9 +13,10 @@ public class Unit : MonoBehaviour {
 
 	public int maxJumpHeight = 6;
 
-
-	public int width = 3;
-	public int height = 6;
+	[SerializeField]
+	private int width = 3;
+	[SerializeField]
+	private int height = 6;
 
 	private Rigidbody2D RB;
 	private Animator anim;
@@ -322,6 +323,8 @@ public class Unit : MonoBehaviour {
 			mFramesOfJumping = GetJumpFrameCount(6);
 		else if (Input.GetKeyDown(KeyCode.Alpha7))
 			mFramesOfJumping = GetJumpFrameCount(7);
+		else if (Input.GetKeyDown(KeyCode.Alpha8))
+			mFramesOfJumping = GetJumpFrameCount(8);
 	}
 
 	public void ChangeState(BotState newState)
@@ -351,6 +354,8 @@ public class Unit : MonoBehaviour {
 				return 28;
 			case 7:
 				return 34;
+			case 8:
+				return 38;
 			default:
 				return 40;
 			}

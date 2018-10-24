@@ -13,12 +13,7 @@ public class LoadLevelEditor : Editor {
 	
 		if(GUILayout.Button ("Load Level")) {
 			loadLevelScript.loadAtStartUp = false;
-			loadLevelScript.ClearLevelFromEditor();
 			loadLevelScript.InstantiateLevel();
-		}
-
-		if(GUILayout.Button ("Clear Level")) {
-			loadLevelScript.ClearLevelFromEditor();
 		}
 	}
 
